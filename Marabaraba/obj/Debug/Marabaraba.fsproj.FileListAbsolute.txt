@@ -1,0 +1,9 @@
+J:\Marabaraba\Marabaraba\bin\Debug\Marabaraba.exe.config
+J:\Marabaraba\Marabaraba\bin\Debug\Marabaraba.XML
+J:\Marabaraba\Marabaraba\bin\Debug\Marabaraba.exe
+J:\Marabaraba\Marabaraba\bin\Debug\Marabaraba.pdb
+J:\Marabaraba\Marabaraba\bin\Debug\FSharp.Core.dll
+J:\Marabaraba\Marabaraba\bin\Debug\System.ValueTuple.dll
+J:\Marabaraba\Marabaraba\bin\Debug\FSharp.Core.xml
+J:\Marabaraba\Marabaraba\obj\Debug\Marabaraba.exe
+J:\Marabaraba\Marabaraba\obj\Debug\Marabaraba.pdb

@@ -1,4 +1,6 @@
-﻿// Learn more about F# at http://fsharp.org
+﻿open System
+
+// Learn more about F# at http://fsharp.org
 // See the 'F# Tutorial' project for more help.
 
 type Coordinates =
@@ -36,37 +38,70 @@ let swapPlayer x=
 let blankBoard =
     let blankRow = Blank, Blank, Blank, Blank, Blank, Blank, Blank
     Board (blankRow, blankRow, blankRow, blankRow, blankRow, blankRow, blankRow)
+let inputCheck (coordinate) = 
+      match String.length (coordinate) with
+      | 2 -> 
+            match Char.IsLetter(coordinate.[0]) && coordinate.[0]<'g' with 
+            | true -> 
+                  match Char.IsDigit(coordinate.[1]) &&  ((Int32.Parse(string coordinate.[1]) >= 0) && Int32.Parse(string coordinate.[1]) < 8) with
+                      | true -> true
+                      | _ -> false
+            | _ -> false
+      | _ -> false
+let test = inputCheck "f6" 
+let listChars = ["a"; "b"; "c";"d";"e";"f"]
+let coardinates index = [for i in 1.. 7-> string (listChars.[index]+string (i))]
+let actCoardinates = [for i in 0.. (listChars.Length-1) -> coardinates i]
+
+(*let BoardCoordinates = 
+               [for i in 0 .. 6 do 
+                    for j in 0 .. 6 do ->
+                                 let input = string (listChars.[i]+)
+                      ]*)
 
 let printBoard (Board (r1, r2, r3, r4, r5, r6, r7)) =
       System.Console.Clear()
+      let liz = "_____" //5
+      let liz2 = "____" //4
+      let bk = "     " //5
+      let bk2 = "    "//4
+      let printSep1 () = printfn  "     |               |               |\n     |               |               |\n     |               |               |"
+      let printSep2 () = printfn  "     |         |           |         |\n     |         |           |         |\n     |         |           |         |"
       let cell offset value n = 
           match value with 
-          | Cow_Black -> 'B'
-          | Cow_White -> 'W'
-          | Blank -> char (string (offset+n))
+          | Cow_Black -> "B"
+          | Cow_White -> "W"
+          | Blank -> string (offset+n)
       let printRow (c1,c2,c3,c4,c5,c6,c7) offset = 
+           printfn "The status is %b" test
+           printfn "The coordinates are %A" (actCoardinates)
            let cell = cell offset
-           printfn "%c---%c---%c---%c---%c---%c---%c" (cell c1 1) (cell c2 2) (cell c3 3) (cell c4 4) (cell c5 5) (cell c6 6) (cell c7 7)
+           let sym = "O"
+           printfn "     %d%s%d%s%d%s%d%s%d%s%d%s%d " 1 bk2 2 bk2 3 bk 4 bk 5 bk2 6 bk2 7 
+           printfn "\n"
+           printfn "A    %s%s%s%s%s%s%s%s%s%s%s%s%s " (cell c1 sym) liz ("") liz ("") liz (cell c3 sym) liz ("") liz ("") liz (cell c7 sym) 
+           printSep1()
+           printfn "B    %s%s%s%s%s%s%s%s%s%s%s%s%s " ("") liz (cell c2 sym) liz ("") liz (cell c3 sym) liz ("") liz (cell c3 sym) liz ("") 
+           printSep1()
+           printfn "C    %s%s%s%s%s%s%s%s%s%s%s%s%s " ("") bk ("") bk (cell c3 sym) liz (cell c3 sym) liz (cell c3 sym) bk ("") bk ("")
+           printSep2()
+           printfn "D    %s%s%s%s%s%s%s%s%s%s%s%s%s " (cell c1 sym) liz2 (cell c2 sym) liz2 (cell c3 sym) bk bk (" ") (cell c3 sym) liz2 (cell c3 sym) liz2 (cell c3 sym)
+           printSep2()
+           printfn "E    %s%s%s%s%s%s%s%s%s%s%s%s%s " ("") bk ("") bk (cell c3 sym) liz (cell c3 sym) liz (cell c3 sym) bk ("") bk ("")
+           printSep1()
+           printfn "F    %s%s%s%s%s%s%s%s%s%s%s%s%s " ("") liz (cell c2 sym) liz ("") liz (cell c3 sym) liz ("") liz (cell c3 sym) liz ("")
+           printSep1()
+           printfn "G    %s%s%s%s%s%s%s%s%s%s%s%s%s " (cell c1 sym) liz ("") liz ("") liz (cell c3 sym) liz ("") liz ("") liz (cell c7 sym)
+      let printSepConners () = printfn "|\%s|%s/|" bk bk    
       let printSep () = printfn "---+---+---+---+---+---+---+"
-      printRow r1 0
-      printSep ()
-      printRow r2 3
-      printSep ()
-      printRow r3 6
-      printSep ()
-      printRow r4 9
-      printSep ()
-      printRow r5 12
-      printSep ()
-      printRow r6 15
-      printSep ()
-      printRow r7 18
-      printSep ()
+      printRow r1 ""
+  
+      
 
 [<EntryPoint>]
 let main argv = 
     //printfn "%A" argv
-    
-          
+    printBoard blankBoard
+    Console.Read()      
 
     0 // return an integer exit code
