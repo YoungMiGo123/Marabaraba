@@ -51,16 +51,34 @@ let inputCheck (coordinate) =
 let test = inputCheck "f6" 
 let listChars = ["a"; "b"; "c";"d";"e";"f"]
 let coardinates index = [for i in 1.. 7-> string (listChars.[index]+string (i))]
+//Dynamic List of all the possible coordinates, inputs will thus be matched to this list 
 let actCoardinates = [for i in 0.. (listChars.Length-1) -> coardinates i]
 
+// Tester method to run through the 2D array of input values...
+let printOutValidCoordinates = 
+          let rec innerHelp (input: string list list) index = 
+              match input with
+              | actCoardinates -> 
+                   match (index) < 6 with
+                   |true ->
+                      let tmp = actCoardinates.[index]
+                      for i in tmp do
+                        printfn "%s status is: %b\t" i (inputCheck i)
+                      printfn "\n"
+                      innerHelp input (index+1)
+                   | _ -> printfn "Done"
+              | [[]]-> printfn "Not correct input" 
+          innerHelp actCoardinates 0  
+                      
 (*let BoardCoordinates = 
                [for i in 0 .. 6 do 
                     for j in 0 .. 6 do ->
                                  let input = string (listChars.[i]+)
                       ]*)
 
+// Prints out the board based on row values
 let printBoard (Board (r1, r2, r3, r4, r5, r6, r7)) =
-      System.Console.Clear()
+      //System.Console.Clear()
       let liz = "_____" //5
       let liz2 = "____" //4
       let bk = "     " //5
@@ -72,13 +90,16 @@ let printBoard (Board (r1, r2, r3, r4, r5, r6, r7)) =
           | Cow_Black -> "B"
           | Cow_White -> "W"
           | Blank -> string (offset+n)
+
       let printRow (c1,c2,c3,c4,c5,c6,c7) offset = 
-           printfn "The status is %b" test
+           printfn "The status is %b" test // Test example of input testing method
+           printOutValidCoordinates // Test example of whether valid an input is 
            printfn "The coordinates are %A" (actCoardinates)
            let cell = cell offset
            let sym = "O"
-           printfn "     %d%s%d%s%d%s%d%s%d%s%d%s%d " 1 bk2 2 bk2 3 bk 4 bk 5 bk2 6 bk2 7 
+           printfn "     %d%s%d%s%d%s%d%s%d%s%d%s%d " 1 bk2 2 bk2 3 bk 4 bk 5 bk2 6 bk2 7  // prints out the number scale at the top of the board
            printfn "\n"
+           // rest of the methods called prints out the board, one line at a time.
            printfn "A    %s%s%s%s%s%s%s%s%s%s%s%s%s " (cell c1 sym) liz ("") liz ("") liz (cell c3 sym) liz ("") liz ("") liz (cell c7 sym) 
            printSep1()
            printfn "B    %s%s%s%s%s%s%s%s%s%s%s%s%s " ("") liz (cell c2 sym) liz ("") liz (cell c3 sym) liz ("") liz (cell c3 sym) liz ("") 
