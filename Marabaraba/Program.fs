@@ -49,6 +49,55 @@ type Shoot = {
 let playerB = {Cows = [();();();();();();();();();();();();();()] ; Turn = false}
 let playerW = {Cows = [();();();();();();();();();();();();();()] ; Turn = false}
 
+let printBoard (Board (r1, r2, r3, r4, r5, r6, r7)) =
+      //System.Console.Clear()
+      let liz = "_____" //5
+      let liz2 = "____" //4
+      let bk = "     " //5
+      let bk2 = "    "//4
+      let printSep1 () = printfn  "     |               |               |\n     |               |               |\n     |               |               |"
+      let printSep2 () = printfn  "     |         |           |         |\n     |         |           |         |\n     |         |           |         |"
+      let cell value = 
+          match value with 
+          | CB -> "B"
+          | CW -> "W"
+          | Blank -> " "
+ 
+      
+      let (a1,a2,a3,a4,a5,a6,a7)  = r1
+      let (b1,b2,b3,b4,b5,b6,b7)  = r2
+      let (c1,c2,c3,c4,c5,c6,c7)  = r3
+      let (d1,d2,d3,d4,d5,d6,d7)  = r4
+      let (e1,e2,e3,e4,e5,e6,e7)  = r5
+      let (f1,f2,f3,f4,f5,f6,f7)  = r6
+      let (g1,g2,g3,g4,g5,g6,g7)  = r7
+           
+          (* printfn "The status is %b" test // Test example of input testing method
+           printOutValidCoordinates // Test example of whether valid an input is 
+           printfn "The coordinates are %A" (actCoardinates)*)
+           //let cell = cell offset
+           //let sym = "O"
+      printfn "     %d%s%d%s%d%s%d%s%d%s%d%s%d " 1 bk2 2 bk2 3 bk 4 bk 5 bk2 6 bk2 7  // prints out the number scale at the top of the board
+      printfn "\n"
+      // rest of the methods called prints out the board, one line at a time.
+      printfn "A    %s%s%s%s%s%s%s%s%s%s%s%s%s " (cell a1 ) liz ("") liz ("") liz (cell a4 ) liz ("") liz ("") liz (cell a7 ) 
+      printSep1()
+      printfn "B    %s%s%s%s%s%s%s%s%s%s%s%s%s " ("") liz (cell b2 ) liz ("") liz (cell b4 ) liz ("") liz (cell b6 ) liz ("") 
+      printSep1()
+      printfn "C    %s%s%s%s%s%s%s%s%s%s%s%s%s " ("") bk ("") bk (cell c3 ) liz (cell c4 ) liz (cell c5 ) bk ("") bk ("")
+      printSep2()
+      printfn "D    %s%s%s%s%s%s%s%s%s%s%s%s%s " (cell d1 ) liz2 (cell d2 ) liz2 (cell d3 ) bk bk (" ") (cell d5 ) liz2 (cell d6 ) liz2 (cell d7 )
+      printSep2()
+      printfn "E    %s%s%s%s%s%s%s%s%s%s%s%s%s " ("") bk ("") bk (cell e3 ) liz (cell e4 ) liz (cell e5 ) bk ("") bk ("")
+      printSep1()
+      printfn "F    %s%s%s%s%s%s%s%s%s%s%s%s%s " ("") liz (cell f2 ) liz ("") liz (cell f4 ) liz ("") liz (cell f6 ) liz ("")
+      printSep1()
+      printfn "G    %s%s%s%s%s%s%s%s%s%s%s%s%s " (cell g1 ) liz ("") liz ("") liz (cell g4 ) liz ("") liz ("") liz (cell g7 ) 
+      let printSepConners () = printfn "|\%s|%s/|" bk bk    
+      printfn ""
+         
+      
+
 type Game=
        { A : char; B : char; C : char; D : char; E : char; F : char; G : char; H : char; I : char; J : char; K : char; L : char; M : char; N : char; O : char; P : char;
            Q : char; R : char;  S : char; T : char; U : char; V : char; W : char; X : char }
@@ -56,15 +105,21 @@ type Game=
 let Game = { A = 'A';  B = 'B'; C = 'C';D = 'D';E = 'E';F = 'F';G = 'G';H = 'H';I = 'I';J = 'J';K = 'K';L = 'L';M = 'M';N = 'N';O = 'O';P = 'P';Q = 'Q';R = 'R';S = 'S';T = 'T';U = 'U';
            V = 'V';W = 'W';X = 'X';}
 //type Result 
+type results =
+| Ongoing of GameBoard
+| Winner of Cell * GameBoard
+| Draw
+
+let clearboard()=System.Console.Clear()
+let blankBoard =
+    let blankRow = Blank, Blank, Blank, Blank, Blank, Blank, Blank
+    Board (blankRow, blankRow, blankRow, blankRow, blankRow, blankRow, blankRow)
+
 let swapPlayer x= 
       match x with 
       | CB -> CW
       | CW -> CB
       | Blank -> failwith "A FATAL ERROR OCCURED"
-let clearboard()=System.Console.Clear()
-let blankBoard =
-    let blankRow = Blank, Blank, Blank, Blank, Blank, Blank, Blank
-    Board (blankRow, blankRow, blankRow, blankRow, blankRow, blankRow, blankRow)
 let inputCheck (coordinate) = 
       match String.length (coordinate) with
       | 2 -> 
@@ -77,62 +132,75 @@ let inputCheck (coordinate) =
       | _ -> false
 let isBlank game position = 
     match position, game with
-    | 1, Board((Blank,_,_,_,_,_,_),_,_,_,_,_,_) -> true
-    | 2, Board((_,_,_,Blank,_,_,_),_,_,_,_,_,_) -> true
-    | 3, Board((_,_,_,_,_,_,Blank),_,_,_,_,_,_) -> true
-    | 4, Board(_,(_,Blank,_,_,_,_,_),_,_,_,_,_) -> true
-    | 5, Board(_,(_,_,_,Blank,_,_,_),_,_,_,_,_) -> true
-    | 6, Board(_,(_,_,_,_,_,Blank,_),_,_,_,_,_) -> true
-    | 7, Board(_,_,(_,_,Blank,_,_,_,_),_,_,_,_) -> true
-    | 8, Board(_,_,(_,_,_,Blank,_,_,_),_,_,_,_) -> true
-    | 9, Board(_,_,(_,_,_,_,Blank,_,_),_,_,_,_) -> true
-    | 10, Board(_,_,_,(Blank,_,_,_,_,_,_),_,_,_) -> true
-    | 11, Board(_,_,_,(_,Blank,_,_,_,_,_),_,_,_) -> true
-    | 12, Board(_,_,_,(_,_,Blank,_,_,_,_),_,_,_) -> true
-    | 13, Board(_,_,_,(_,_,_,_,Blank,_,_),_,_,_) -> true
-    | 14, Board(_,_,_,(_,_,_,_,_,Blank,_),_,_,_) -> true
-    | 15, Board(_,_,_,(_,_,_,_,_,_,Blank),_,_,_) -> true
-    | 16, Board(_,_,_,_,(_,_,Blank,_,_,_,_),_,_) -> true
-    | 17, Board(_,_,_,_,(_,_,_,Blank,_,_,_),_,_) -> true
-    | 18, Board(_,_,_,_,(_,_,_,_,Blank,_,_),_,_) -> true
-    | 19, Board(_,_,_,_,_,(_,Blank,_,_,_,_,_),_) -> true
-    | 20, Board(_,_,_,_,_,(_,_,_,Blank,_,_,_),_) -> true
-    | 21, Board(_,_,_,_,_,(_,_,_,_,_,Blank,_),_) -> true
-    | 22, Board(_,_,_,_,_,_,(Blank,_,_,_,_,_,_)) -> true
-    | 23, Board(_,_,_,_,_,_,(_,_,_,Blank,_,_,_)) -> true
-    | 24, Board(_,_,_,_,_,_,(_,_,_,_,_,_,Blank)) -> true
+    | "A1", Board((Blank,_,_,_,_,_,_),_,_,_,_,_,_) -> true
+    | "A4", Board((_,_,_,Blank,_,_,_),_,_,_,_,_,_) -> true
+    | "A7", Board((_,_,_,_,_,_,Blank),_,_,_,_,_,_) -> true
+    | "B2", Board(_,(_,Blank,_,_,_,_,_),_,_,_,_,_) -> true
+    | "B4", Board(_,(_,_,_,Blank,_,_,_),_,_,_,_,_) -> true
+    | "B6", Board(_,(_,_,_,_,_,Blank,_),_,_,_,_,_) -> true
+    | "C3", Board(_,_,(_,_,Blank,_,_,_,_),_,_,_,_) -> true
+    | "C4", Board(_,_,(_,_,_,Blank,_,_,_),_,_,_,_) -> true
+    | "C5", Board(_,_,(_,_,_,_,Blank,_,_),_,_,_,_) -> true
+    | "D1", Board(_,_,_,(Blank,_,_,_,_,_,_),_,_,_) -> true
+    | "D2", Board(_,_,_,(_,Blank,_,_,_,_,_),_,_,_) -> true
+    | "D3", Board(_,_,_,(_,_,Blank,_,_,_,_),_,_,_) -> true
+    | "D5", Board(_,_,_,(_,_,_,_,Blank,_,_),_,_,_) -> true
+    | "D6", Board(_,_,_,(_,_,_,_,_,Blank,_),_,_,_) -> true
+    | "D7", Board(_,_,_,(_,_,_,_,_,_,Blank),_,_,_) -> true
+    | "E3", Board(_,_,_,_,(_,_,Blank,_,_,_,_),_,_) -> true
+    | "E4", Board(_,_,_,_,(_,_,_,Blank,_,_,_),_,_) -> true
+    | "E5", Board(_,_,_,_,(_,_,_,_,Blank,_,_),_,_) -> true
+    | "F2", Board(_,_,_,_,_,(_,Blank,_,_,_,_,_),_) -> true
+    | "F4", Board(_,_,_,_,_,(_,_,_,Blank,_,_,_),_) -> true
+    | "F6", Board(_,_,_,_,_,(_,_,_,_,_,Blank,_),_) -> true
+    | "G1", Board(_,_,_,_,_,_,(Blank,_,_,_,_,_,_)) -> true
+    | "G4", Board(_,_,_,_,_,_,(_,_,_,Blank,_,_,_)) -> true
+    | "G7", Board(_,_,_,_,_,_,(_,_,_,_,_,_,Blank)) -> true
     | _ -> false 
-let Mill (shoot, game) = 
-     
-    
-let gamecheck game =
-    let Board(r1,r2,r3,r4,r5,r6,r7) = game
-    match r1,r2,r3,r4,r5,r6,r7 with
-    | ((CB,_,_,CB,_,_,CB),_,_,_,_,_,_) -> Mill(Shoot, Game) //Line a
-    | (_,(_,CB,_,CB,_,CB,_),_,_,_,_,_) -> Mill(Shoot, Game) //Line/Mill b
-    | (_,_,(_,_,CB,CB,CB,_,_),_,_,_,_) -> Mill(Shoot, Game) //Line/Mill c
-    | (_,_,_,(CB,CB,CB,_,_,_,_),_,_,_) -> Mill(Shoot, Game) //Line/Mill d
-    | (_,_,_,(_,_,_,_,CB,CB,CB),_,_,_) -> Mill(Shoot, Game) //Line/Mill d
-    | (_,_,_,_,(_,_,CB,CB,CB,_,_),_,_) -> Mill(Shoot, Game) //Line/Mill e
-    | (_,_,_,_,_,(_,CB,_,CB,_,CB,_),_) -> Mill(Shoot, Game) //Line/Mill f
-    | (_,_,_,_,_,_,(CB,_,_,CB,_,_,CB)) -> Mill(Shoot, Game) //Line/Mill g
-    | (CB,_,_,_,_,_,_),_,_,(CB,_,_,_,_,_,_),_,_,(CB,_,_,_,_,_,_) -> Mill(Shoot,game) // Line/Mill Column 1
-    | (_,(_,CB,_,_,_,_,_),_,(_,CB,_,_,_,_,_),_,(_,CB,_,_,_,_,_),_) -> Mill(Shoot,game) //Line/Mill Column 2
-    | (_,_,(_,_,CB,_,_,_,_),(_,_,CB,_,_,_,_),(_,_,CB,_,_,_,_),_,_) -> Mill(Shoot,game) // Line/Mill Column 3
-    | ((_,_,_,CB,_,_,_),(_,_,CB,_,_,_,_),(_,_,CB,_,_,_,_),_,_,_,_) -> Mill(Shoot,game) //Line/Mill Column 4
-    | (_,_,_,_,(_,_,_,CB,_,_,_),(_,_,_,CB,_,_,_),(_,_,_,CB,_,_,_)) -> Mill(Shoot,game) //Line/Mill Column 4
-    | (_,_,(_,_,_,_,CB,_,_),(_,_,_,_,CB,_,_),(_,_,_,_,CB,_,_),_,_) -> Mill(Shoot,game) //Line/Mill Column 5
-    | (_,(_,_,_,_,_,CB,_),_,(_,_,_,_,_,CB,_),_,(_,_,_,_,_,CB,_),_) -> Mill(Shoot,game) // Line/Mill Column 6
-    | ((_,_,_,_,_,_,CB),_,_,(_,_,_,_,_,_,CB),_,_,(_,_,_,_,_,_,CB)) -> Mill(Shoot,game) // Line/Mill Column 7
-    | ((CB,_,_,_,_,_,_), (_,CB,_,_,_,_,_), (_,_,CB,_,_,_,_),_,_,_,_) -> Mill(Shoot,game) // Line/Mill Diagonal A-C 
-    | ((_,_,_,_,_,_,CB), (_,_,_,_,_,CB,_), (_,_,_,_,CB,_,_),_,_,_,_) ->Mill(Shoot,game) //Line/Mill diagonal C-A
-    | (_,_,_,_,(_,_,CB,_,_,_,_),(_,CB,_,_,_,_,_), (CB,_,_,_,_,_,_)) -> Mill(Shoot,game) //Line/Mill diagonal G-E
-    | (_,_,_,_,(_,_,_,_,CB,_,_),(_,_,_,_,_,CB,_), (_,_,_,_,_,_,CB)) -> Mill(Shoot,game) //Line/Mill diagonal E-G
-    | _ -> 
-         let f = isBlank game
-         match f 1 || f 2 || f 3||f 4 ||f 5 ||f 6 ||f 7 ||f 8 ||f 9 ||f 10 ||f 11 ||f 12 ||f 13 ||f 14 ||f 15 ||f 16 ||f 17 ||f 18 ||f 19||f 20 ||f 21 ||f 22 ||f 23 ||f 24 with
-         | true -> Ongoing game
-         | _ -> Draw
+let Mill (shoot:string, game:GameBoard) =
+    match game with
+    | Board((CB,_,_,CB,_,_,CB),_,_,_,_,_,_) -> true //Line a
+    | Board(_,(_,CB,_,CB,_,CB,_),_,_,_,_,_) ->true //Line/Mill b
+    | Board(_,_,(_,_,CB,CB,CB,_,_),_,_,_,_) ->true //Line/Mill c
+    | Board(_,_,_,(CB,CB,CB,_,_,_,_),_,_,_) -> true //Line/Mill d
+    | Board(_,_,_,(_,_,_,_,CB,CB,CB),_,_,_) -> true//Line/Mill d
+    | Board(_,_,_,_,(_,_,CB,CB,CB,_,_),_,_) ->true//Line/Mill e
+    | Board(_,_,_,_,_,(_,CB,_,CB,_,CB,_),_) -> true //Line/Mill f
+    | Board(_,_,_,_,_,_,(CB,_,_,CB,_,_,CB)) -> true //Line/Mill g
+    | Board((CB,_,_,_,_,_,_),_,_,(CB,_,_,_,_,_,_),_,_,(CB,_,_,_,_,_,_)) -> true // Line/Mill Column 1
+    | Board(_,(_,CB,_,_,_,_,_),_,(_,CB,_,_,_,_,_),_,(_,CB,_,_,_,_,_),_) -> true //Line/Mill Column 2
+    | Board(_,_,(_,_,CB,_,_,_,_),(_,_,CB,_,_,_,_),(_,_,CB,_,_,_,_),_,_) -> true // Line/Mill Column 3
+    | Board((_,_,_,CB,_,_,_),(_,_,CB,_,_,_,_),(_,_,CB,_,_,_,_),_,_,_,_) ->true //Line/Mill Column 4
+    | Board(_,_,_,_,(_,_,_,CB,_,_,_),(_,_,_,CB,_,_,_),(_,_,_,CB,_,_,_)) ->true//Line/Mill Column 4
+    | Board(_,_,(_,_,_,_,CB,_,_),(_,_,_,_,CB,_,_),(_,_,_,_,CB,_,_),_,_) -> true //Line/Mill Column 5
+    | Board(_,(_,_,_,_,_,CB,_),_,(_,_,_,_,_,CB,_),_,(_,_,_,_,_,CB,_),_) ->true // Line/Mill Column 6
+    | Board((_,_,_,_,_,_,CB),_,_,(_,_,_,_,_,_,CB),_,_,(_,_,_,_,_,_,CB)) -> true // Line/Mill Column 7
+    | Board((CB,_,_,_,_,_,_), (_,CB,_,_,_,_,_), (_,_,CB,_,_,_,_),_,_,_,_) -> true // Line/Mill Diagonal A-C 
+    | Board((_,_,_,_,_,_,CB), (_,_,_,_,_,CB,_), (_,_,_,_,CB,_,_),_,_,_,_) ->true //Line/Mill diagonal C-A
+    | Board(_,_,_,_,(_,_,CB,_,_,_,_),(_,CB,_,_,_,_,_), (CB,_,_,_,_,_,_)) -> true //Line/Mill diagonal G-E
+    | Board(_,_,_,_,(_,_,_,_,CB,_,_),(_,_,_,_,_,CB,_), (_,_,_,_,_,_,CB)) -> true //Line/Mill diagonal E-G
+    | Board((CW,_,_,CW,_,_,CW),_,_,_,_,_,_) -> true //Line a
+    | Board(_,(_,CW,_,CW,_,CW,_),_,_,_,_,_) ->true //Line/Mill b
+    | Board(_,_,(_,_,CW,CW,CW,_,_),_,_,_,_) ->true //Line/Mill c
+    | Board(_,_,_,(CW,CW,CW,_,_,_,_),_,_,_) -> true //Line/Mill d
+    | Board(_,_,_,(_,_,_,_,CW,CW,CW),_,_,_) -> true//Line/Mill d
+    | Board(_,_,_,_,(_,_,CW,CW,CW,_,_),_,_) ->true//Line/Mill e
+    | Board(_,_,_,_,_,(_,CW,_,CW,_,CW,_),_) -> true //Line/Mill f
+    | Board(_,_,_,_,_,_,(CW,_,_,CW,_,_,CW)) -> true //Line/Mill g
+    | Board((CW,_,_,_,_,_,_),_,_,(CW,_,_,_,_,_,_),_,_,(CW,_,_,_,_,_,_)) -> true // Line/Mill Column 1
+    | Board(_,(_,CW,_,_,_,_,_),_,(_,CW,_,_,_,_,_),_,(_,CW,_,_,_,_,_),_) -> true //Line/Mill Column 2
+    | Board(_,_,(_,_,CW,_,_,_,_),(_,_,CW,_,_,_,_),(_,_,CW,_,_,_,_),_,_) -> true // Line/Mill Column 3
+    | Board((_,_,_,CW,_,_,_),(_,_,CW,_,_,_,_),(_,_,CW,_,_,_,_),_,_,_,_) ->true //Line/Mill Column 4
+    | Board(_,_,_,_,(_,_,_,CW,_,_,_),(_,_,_,CW,_,_,_),(_,_,_,CW,_,_,_)) ->true//Line/Mill Column 4
+    | Board(_,_,(_,_,_,_,CW,_,_),(_,_,_,_,CW,_,_),(_,_,_,_,CW,_,_),_,_) -> true //Line/Mill Column 5
+    | Board(_,(_,_,_,_,_,CW,_),_,(_,_,_,_,_,CW,_),_,(_,_,_,_,_,CW,_),_) ->true // Line/Mill Column 6
+    | Board((_,_,_,_,_,_,CW),_,_,(_,_,_,_,_,_,CW),_,_,(_,_,_,_,_,_,CW)) -> true // Line/Mill Column 7
+    | Board((CW,_,_,_,_,_,_), (_,CW,_,_,_,_,_), (_,_,CW,_,_,_,_),_,_,_,_) -> true // Line/Mill Diagonal A-C 
+    | Board((_,_,_,_,_,_,CW), (_,_,_,_,_,CW,_), (_,_,_,_,CW,_,_),_,_,_,_) ->true //Line/Mill diagonal C-A
+    | Board(_,_,_,_,(_,_,CW,_,_,_,_),(_,CW,_,_,_,_,_), (CW,_,_,_,_,_,_)) -> true //Line/Mill diagonal G-E
+    | Board(_,_,_,_,(_,_,_,_,CW,_,_),(_,_,_,_,_,CW,_), (_,_,_,_,_,_,CW)) -> true //Line/Mill diagonal E-G
+    | _ -> false 
+         
 
 let test = inputCheck "f6" 
 let listChars = ["a"; "b"; "c";"d";"e";"f"]
@@ -156,42 +224,7 @@ let printOutValidCoordinates =
               | [[]]-> printfn "Not correct input" 
           innerHelp actCoardinates 0  
                       
-(*let BoardCoordinates = 
-               [for i in 0 .. 6 do 
-                    for j in 0 .. 6 do ->
-                                 let input = string (listChars.[i]+)
-                      ]*)
-let boardnumbering num =
-   match num with
-   |"A" -> 1
-   |"B"-> 2
-   |"C"-> 3
-   |"D"-> 4
-   |"E"-> 5
-   |"F"-> 6
-   |"G"-> 7
-   |"H"-> 8
-   |"I"-> 9
-   |"J"-> 10
-   |"K"-> 11
-   |"L"-> 12
-   |"M"-> 13
-   |"N"-> 14
-   |"O"-> 15
-   |"P"-> 16
-   |"Q"-> 17
-   |"R"-> 18
-   |"S"-> 19
-   |"T"-> 20
-   |"U"-> 21
-   |"V"-> 22
-   |"W"-> 23
-   |"X"-> 24
-   |_ ->  -1
-(*let gameCheck game =
-     let (Board (r1, r2,r3,r4,r5,r6,r7)) = game
-     match r1,r2,r3,r4,r5,r6,r7 with
-     | 1, Board ((Blank,_,_,_,_,_,_),_, *)
+
 
 let makeMove symbol (Board (r1, r2,r3,r4,r5,r6,r7)) pos = 
       let newBoard = 
@@ -207,33 +240,53 @@ let makeMove symbol (Board (r1, r2,r3,r4,r5,r6,r7)) pos =
             | _ -> failwith "Error occured"
          let data = 
              match pos with
-             | 1 -> changeCol 0 r1, r2,r3,r4,r5,r6,r7
-             | 2 -> changeCol 3 r1, r2,r3,r4,r5,r6,r7
-             | 3 -> changeCol 6 r1, r2,r3,r4,r5,r6,r7
-             | 4 -> r1, changeCol 1 r2,r3,r4,r5,r6,r7
-             | 5 -> r1, changeCol 3 r2,r3,r4,r5,r6,r7
-             | 6 -> r1, changeCol 5 r2,r3,r4,r5,r6,r7
-             | 7 -> r1, r2, changeCol 2 r3,r4,r5,r6,r7
-             | 8 -> r1, r2, changeCol 3 r3,r4,r5,r6,r7
-             | 9 -> r1, r2, changeCol 4 r3,r4,r5,r6,r7
-             | 10 -> r1, r2,r3,changeCol 0 r4,r5,r6,r7
-             | 11 -> r1, r2,r3, changeCol 1 r4,r5,r6,r7
-             | 12 -> r1, r2,r3, changeCol 2 r4,r5,r6,r7
-             | 13 -> r1, r2,r3, changeCol 4 r4,r5,r6,r7
-             | 14 -> r1, r2,r3,changeCol 5 r4,r5,r6,r7
-             | 15 -> r1, r2,r3, changeCol 6 r4,r5,r6,r7
-             | 16 -> r1, r2,r3,r4, changeCol 2 r5,r6,r7
-             | 17 -> r1, r2,r3,r4,changeCol 3 r5,r6,r7
-             | 18 -> r1, r2,r3,r4,changeCol 4 r5,r6,r7
-             | 19 -> r1, r2,r3,r4,r5, changeCol 1 r6,r7
-             | 20 ->  r1, r2,r3,r4,r5,changeCol 3 r6,r7
-             | 21 ->  r1, r2,r3,r4,r5, changeCol 5 r6,r7
-             | 22 ->  r1, r2,r3,r4,r5,r6, changeCol 0 r7
-             | 21 ->  r1, r2,r3,r4,r5, r6, changeCol 3 r7
-             | 24 ->  r1, r2,r3,r4,r5,r6, changeCol 5 r7
+             | "A1" -> changeCol 0 r1, r2,r3,r4,r5,r6,r7
+             | "A4" -> changeCol 3 r1, r2,r3,r4,r5,r6,r7
+             | "A7" -> changeCol 6 r1, r2,r3,r4,r5,r6,r7
+             | "B2" -> r1, changeCol 1 r2,r3,r4,r5,r6,r7
+             | "B4" -> r1, changeCol 3 r2,r3,r4,r5,r6,r7
+             | "B6" -> r1, changeCol 5 r2,r3,r4,r5,r6,r7
+             | "C3" -> r1, r2, changeCol 2 r3,r4,r5,r6,r7
+             | "C4" -> r1, r2, changeCol 3 r3,r4,r5,r6,r7
+             | "C5" -> r1, r2, changeCol 4 r3,r4,r5,r6,r7
+             | "D1" -> r1, r2,r3,changeCol 0 r4,r5,r6,r7
+             | "D2" -> r1, r2,r3, changeCol 1 r4,r5,r6,r7
+             | "D3" -> r1, r2,r3, changeCol 2 r4,r5,r6,r7
+             | "D5" -> r1, r2,r3, changeCol 4 r4,r5,r6,r7
+             | "D6" -> r1, r2,r3,changeCol 5 r4,r5,r6,r7
+             | "D7" -> r1, r2,r3, changeCol 6 r4,r5,r6,r7
+             | "E3" -> r1, r2,r3,r4, changeCol 2 r5,r6,r7
+             | "E4" -> r1, r2,r3,r4,changeCol 3 r5,r6,r7
+             | "E5" -> r1, r2,r3,r4,changeCol 4 r5,r6,r7
+             | "F2" -> r1, r2,r3,r4,r5, changeCol 1 r6,r7
+             | "F4" ->  r1, r2,r3,r4,r5,changeCol 3 r6,r7
+             | "F6" ->  r1, r2,r3,r4,r5, changeCol 5 r6,r7
+             | "G1" ->  r1, r2,r3,r4,r5,r6, changeCol 0 r7
+             | "G4" ->  r1, r2,r3,r4,r5, r6, changeCol 3 r7
+             | "G7" ->  r1, r2,r3,r4,r5,r6, changeCol 6 r7
              | _ -> failwith "error occured in changing columns"
          Board data
+      Ongoing newBoard
 
+let rec run player game =
+    // need to find the blank cells that can be used...
+    clearboard()
+    printBoard game
+    printfn "%A's turn.  Type the number of the cell that you want to play into." player
+    let n = System.Console.ReadLine() // Co-ordinate for cow from user
+    match n with
+    | "A1" | "A4" | "A7" | "B2" | "B4" | "B6" | "C3" | "C4" | "C5"
+    | "D1" | "D2" | "D3" | "D5" | "D6" | "D7" | "E3" | "E4" | "E5"
+    | "F2" | "F4" | "F6" | "G1" | "G4" | "G7"  ->
+           // let i = int (string n)
+            match isBlank game n with
+             | true -> makeMove player game n
+             | _ ->
+                  printfn "Invalid Input, Please re-enter position" 
+                  run player game
+                    
+    | _ -> run player game
+    
 // Prints out the board based on row values
 let rules() = printfn ("The game contains 3 stages
 Stage 1: Cow placing
@@ -262,51 +315,23 @@ clearboard ()
 rules()
 printfn" Please press [P] to play the game!"
 let getinput()  = (System.Console.ReadKey true).KeyChar
-let printBoard (Board (r1, r2, r3, r4, r5, r6, r7)) =
-      //System.Console.Clear()
-      let liz = "_____" //5
-      let liz2 = "____" //4
-      let bk = "     " //5
-      let bk2 = "    "//4
-      let printSep1 () = printfn  "     |               |               |\n     |               |               |\n     |               |               |"
-      let printSep2 () = printfn  "     |         |           |         |\n     |         |           |         |\n     |         |           |         |"
-      let cell offset value n = 
-          match value with 
-          | Cow_Black -> "B"
-          | Cow_White -> "W"
-          | Blank -> string (offset+n)
- 
-      
-      let printRow (c1,c2,c3,c4,c5,c6,c7) offset = 
-           
-           
-           printfn "The status is %b" test // Test example of input testing method
-           printOutValidCoordinates // Test example of whether valid an input is 
-           printfn "The coordinates are %A" (actCoardinates)
-           let cell = cell offset
-           //let sym = "O"
-           printfn "     %d%s%d%s%d%s%d%s%d%s%d%s%d " 1 bk2 2 bk2 3 bk 4 bk 5 bk2 6 bk2 7  // prints out the number scale at the top of the board
-           printfn "\n"
-           // rest of the methods called prints out the board, one line at a time.
-           printfn "A    %s%s%s%s%s%s%s%s%s%s%s%s%s " (cell c1 "A") liz ("") liz ("") liz (cell c3 "B") liz ("") liz ("") liz (cell c7 "C") 
-           printSep1()
-           printfn "B    %s%s%s%s%s%s%s%s%s%s%s%s%s " ("") liz (cell c2 "D") liz ("") liz (cell c3 "E") liz ("") liz (cell c3 "F") liz ("") 
-           printSep1()
-           printfn "C    %s%s%s%s%s%s%s%s%s%s%s%s%s " ("") bk ("") bk (cell c3 "G") liz (cell c3 "H") liz (cell c3 "I") bk ("") bk ("")
-           printSep2()
-           printfn "D    %s%s%s%s%s%s%s%s%s%s%s%s%s " (cell c1 "J") liz2 (cell c2 "K") liz2 (cell c3 "L") bk bk (" ") (cell c3 "M") liz2 (cell c3 "N") liz2 (cell c3 "O")
-           printSep2()
-           printfn "E    %s%s%s%s%s%s%s%s%s%s%s%s%s " ("") bk ("") bk (cell c3 "P") liz (cell c3 "Q") liz (cell c3 "R") bk ("") bk ("")
-           printSep1()
-           printfn "F    %s%s%s%s%s%s%s%s%s%s%s%s%s " ("") liz (cell c2 "S") liz ("") liz (cell c3 "T") liz ("") liz (cell c3 "U") liz ("")
-           printSep1()
-           printfn "G    %s%s%s%s%s%s%s%s%s%s%s%s%s " (cell c1 "V") liz ("") liz ("") liz (cell c3 "W") liz ("") liz ("") liz (cell c7 "X") 
-      let printSepConners () = printfn "|\%s|%s/|" bk bk    
-      let printSep () = printfn "---+---+---+---+---+---+---+"
-      printRow r1 "" 
 
-
-let charcheck c =
+let rec runGame currentPlayer game =
+    let playAgain () =
+        printfn "Play again? [y/N] "
+        match System.Console.ReadLine() with
+        | "Y" | "y" -> runGame CB blankBoard
+        | _ -> ()
+    match run currentPlayer game with
+    | Ongoing newBoard -> runGame (swapPlayer currentPlayer) newBoard
+    | Winner (player, board) ->
+        printBoard board
+        printfn "Winner is %A" player
+        playAgain ()
+    | Draw ->
+        printfn "Draaaaw"
+        playAgain ()
+(*let charcheck c =
      match c  with
      | 'A'| 'B'|'C'|'D'|'E'|'F'|'a'| 'b'|'c'|'d'|'e'|'f' -> true
      | _ -> false 
@@ -317,18 +342,18 @@ let b =6
 let msgPlacing = "Please enter the letter you want to place your cow at"
 let msgMoving = "Please enter the letter you want to move your cow to"
 let msgFlying = "Please enter the letter you want to fly your cow to"
-let msgError = "Invalid output, please choose a different cell"      
+let msgError = "Invalid output, please choose a different cell"   *)   
 
 [<EntryPoint>]
 let main argv = 
     //printfn "%A" argv
-    let r = getinput ()
+   (* let r = getinput ()
     match r with
        |'p'|'P' -> 
             clearboard()
-            printBoard blankBoard
-       | _ -> ()
+            printBo*)
     //printBoard blankBoard
+    runGame CB blankBoard
     Console.Read()      
 
     0 // return an integer exit code
