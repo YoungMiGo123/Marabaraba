@@ -41,10 +41,7 @@ type States =
  |Moving of (char*int) * string list
  |Flying of (char*int) * (char * int)
 
-type Shoot = {
-      Coordinate: string
-      Board: GameBoard
-      }
+
     
 let playerB = {Cows = [();();();();();();();();();();();();();()] ; Turn = false}
 let playerW = {Cows = [();();();();();();();();();();();();();()] ; Turn = false}
@@ -104,7 +101,7 @@ type Game=
 
 let Game = { A = 'A';  B = 'B'; C = 'C';D = 'D';E = 'E';F = 'F';G = 'G';H = 'H';I = 'I';J = 'J';K = 'K';L = 'L';M = 'M';N = 'N';O = 'O';P = 'P';Q = 'Q';R = 'R';S = 'S';T = 'T';U = 'U';
            V = 'V';W = 'W';X = 'X';}
-//type Result 
+
 type results =
 | Ongoing of GameBoard
 | Winner of Cell * GameBoard
@@ -157,7 +154,8 @@ let isBlank game position =
     | "G4", Board(_,_,_,_,_,_,(_,_,_,Blank,_,_,_)) -> true
     | "G7", Board(_,_,_,_,_,_,(_,_,_,_,_,_,Blank)) -> true
     | _ -> false 
-let Mill (shoot:string, game:GameBoard) =
+
+let MillBlack (game:GameBoard) =
     match game with
     | Board((CB,_,_,CB,_,_,CB),_,_,_,_,_,_) -> true //Line a
     | Board(_,(_,CB,_,CB,_,CB,_),_,_,_,_,_) ->true //Line/Mill b
@@ -179,6 +177,9 @@ let Mill (shoot:string, game:GameBoard) =
     | Board((_,_,_,_,_,_,CB), (_,_,_,_,_,CB,_), (_,_,_,_,CB,_,_),_,_,_,_) ->true //Line/Mill diagonal C-A
     | Board(_,_,_,_,(_,_,CB,_,_,_,_),(_,CB,_,_,_,_,_), (CB,_,_,_,_,_,_)) -> true //Line/Mill diagonal G-E
     | Board(_,_,_,_,(_,_,_,_,CB,_,_),(_,_,_,_,_,CB,_), (_,_,_,_,_,_,CB)) -> true //Line/Mill diagonal E-G
+    | _ -> false
+let MillWhite(game: GameBoard) = 
+    match game with
     | Board((CW,_,_,CW,_,_,CW),_,_,_,_,_,_) -> true //Line a
     | Board(_,(_,CW,_,CW,_,CW,_),_,_,_,_,_) ->true //Line/Mill b
     | Board(_,_,(_,_,CW,CW,CW,_,_),_,_,_,_) ->true //Line/Mill c
@@ -200,9 +201,52 @@ let Mill (shoot:string, game:GameBoard) =
     | Board(_,_,_,_,(_,_,CW,_,_,_,_),(_,CW,_,_,_,_,_), (CW,_,_,_,_,_,_)) -> true //Line/Mill diagonal G-E
     | Board(_,_,_,_,(_,_,_,_,CW,_,_),(_,_,_,_,_,CW,_), (_,_,_,_,_,_,CW)) -> true //Line/Mill diagonal E-G
     | _ -> false 
-         
+
+(*let makeMove symbol (Board (r1, r2,r3,r4,r5,r6,r7)) pos = 
+      let newBoard = 
+         let changeCol col (a,b,c,d,e,f,g) = 
+            match col with 
+            | 0 -> symbol,b,c,d,e,f,g
+            | 1 -> a,symbol,c,d,e,f,g
+            | 2 -> a,b,symbol,d,e,f,g
+            | 3 -> a,b, c, symbol,e,f,g
+            | 4 -> a,b,c,d,symbol,f,g
+            | 5 -> a,b,c,d,e,symbol,g
+            | 6 -> a,b,c,d,e,f,symbol
+            | _ -> failwith "Error occured"
+         let data = 
+             match pos with
+             | "A1" -> changeCol 0 r1, r2,r3,r4,r5,r6,r7  //1
+             | "A4" -> changeCol 3 r1, r2,r3,r4,r5,r6,r7 //2
+             | "A7" -> changeCol 6 r1, r2,r3,r4,r5,r6,r7 //3
+             | "B2" -> r1, changeCol 1 r2,r3,r4,r5,r6,r7 //4
+             | "B4" -> r1, changeCol 3 r2,r3,r4,r5,r6,r7 //5
+             | "B6" -> r1, changeCol 5 r2,r3,r4,r5,r6,r7 //6 
+             | "C3" -> r1, r2, changeCol 2 r3,r4,r5,r6,r7 //7
+             | "C4" -> r1, r2, changeCol 3 r3,r4,r5,r6,r7 //8
+             | "C5" -> r1, r2, changeCol 4 r3,r4,r5,r6,r7 //9
+             | "D1" -> r1, r2,r3,changeCol 0 r4,r5,r6,r7 //10
+             | "D2" -> r1, r2,r3, changeCol 1 r4,r5,r6,r7 //11
+             | "D3" -> r1, r2,r3, changeCol 2 r4,r5,r6,r7 //12
+             | "D5" -> r1, r2,r3, changeCol 4 r4,r5,r6,r7 //13
+             | "D6" -> r1, r2,r3,changeCol 5 r4,r5,r6,r7 //14
+             | "D7" -> r1, r2,r3, changeCol 6 r4,r5,r6,r7 //15
+             | "E3" -> r1, r2,r3,r4, changeCol 2 r5,r6,r7 //16
+             | "E4" -> r1, r2,r3,r4,changeCol 3 r5,r6,r7 //17
+             | "E5" -> r1, r2,r3,r4,changeCol 4 r5,r6,r7 //18
+             | "F2" -> r1, r2,r3,r4,r5, changeCol 1 r6,r7 //19
+             | "F4" ->  r1, r2,r3,r4,r5,changeCol 3 r6,r7 //20
+             | "F6" ->  r1, r2,r3,r4,r5, changeCol 5 r6,r7 //21
+             | "G1" ->  r1, r2,r3,r4,r5,r6, changeCol 0 r7 //22
+             | "G4" ->  r1, r2,r3,r4,r5, r6, changeCol 3 r7 //23
+             | "G7" ->  r1, r2,r3,r4,r5,r6, changeCol 5 r7 //24
+             | _ -> failwith "error occured in changing columns"
+         Board data
+      gamecheck newBoard
+*)
 
 let test = inputCheck "f6" 
+//let test2 = isBlank ga
 let listChars = ["a"; "b"; "c";"d";"e";"f"]
 let coardinates index = [for i in 1.. 7-> string (listChars.[index]+string (i))]
 //Dynamic List of all the possible coordinates, inputs will thus be matched to this list 
@@ -221,9 +265,10 @@ let printOutValidCoordinates =
                       printfn "\n"
                       innerHelp input (index+1)
                    | _ -> printfn "Done"
-              | [[]]-> printfn "Not correct input" 
+              //| [[]]-> printfn "Not correct input" 
           innerHelp actCoardinates 0  
                       
+
 
 
 let makeMove symbol (Board (r1, r2,r3,r4,r5,r6,r7)) pos = 
@@ -268,6 +313,23 @@ let makeMove symbol (Board (r1, r2,r3,r4,r5,r6,r7)) pos =
          Board data
       Ongoing newBoard
 
+
+let Shoot (position:string) (game:GameBoard) player = 
+    let black = 
+      match (MillBlack game) with 
+      | true -> 
+            match (isBlank game position) with
+            | false -> makeMove player game position 
+            | _ -> Ongoing game
+      | _ -> Ongoing game
+    let white = 
+        match (MillWhite game) with 
+          | true -> 
+            match (isBlank game position) with
+            | false -> makeMove player game position 
+            | _ -> Ongoing game
+          | _ -> Ongoing game
+    white
 let rec run player game =
     // need to find the blank cells that can be used...
     clearboard()
@@ -313,8 +375,10 @@ Finishing the game
 
 clearboard ()
 rules()
-printfn" Please press [P] to play the game!"
+printfn " Please press [P] to play the game!"
 let getinput()  = (System.Console.ReadKey true).KeyChar
+ 
+
 
 let rec runGame currentPlayer game =
     let playAgain () =
@@ -343,7 +407,6 @@ let msgPlacing = "Please enter the letter you want to place your cow at"
 let msgMoving = "Please enter the letter you want to move your cow to"
 let msgFlying = "Please enter the letter you want to fly your cow to"
 let msgError = "Invalid output, please choose a different cell"   *)   
-
 [<EntryPoint>]
 let main argv = 
     //printfn "%A" argv
@@ -354,6 +417,6 @@ let main argv =
             printBo*)
     //printBoard blankBoard
     runGame CB blankBoard
-    Console.Read()      
+   // Console.Read()      
 
     0 // return an integer exit code
