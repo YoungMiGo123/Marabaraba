@@ -7,3 +7,12 @@ J:\Marabaraba\Marabaraba\bin\Debug\System.ValueTuple.dll
 J:\Marabaraba\Marabaraba\bin\Debug\FSharp.Core.xml
 J:\Marabaraba\Marabaraba\obj\Debug\Marabaraba.exe
 J:\Marabaraba\Marabaraba\obj\Debug\Marabaraba.pdb
+\\ict.ru.ac.za\DFS\UGHomes\g15R2152\Desktop\git_exercise\Morabaraba\Marabaraba\bin\Debug\Marabaraba.exe.config
+\\ict.ru.ac.za\DFS\UGHomes\g15R2152\Desktop\git_exercise\Morabaraba\Marabaraba\bin\Debug\Marabaraba.XML
+\\ict.ru.ac.za\DFS\UGHomes\g15R2152\Desktop\git_exercise\Morabaraba\Marabaraba\bin\Debug\Marabaraba.exe
+\\ict.ru.ac.za\DFS\UGHomes\g15R2152\Desktop\git_exercise\Morabaraba\Marabaraba\bin\Debug\Marabaraba.pdb
+\\ict.ru.ac.za\DFS\UGHomes\g15R2152\Desktop\git_exercise\Morabaraba\Marabaraba\bin\Debug\FSharp.Core.dll
+\\ict.ru.ac.za\DFS\UGHomes\g15R2152\Desktop\git_exercise\Morabaraba\Marabaraba\bin\Debug\System.ValueTuple.dll
+\\ict.ru.ac.za\DFS\UGHomes\g15R2152\Desktop\git_exercise\Morabaraba\Marabaraba\bin\Debug\FSharp.Core.xml
+\\ict.ru.ac.za\DFS\UGHomes\g15R2152\Desktop\git_exercise\Morabaraba\Marabaraba\obj\Debug\Marabaraba.exe
+\\ict.ru.ac.za\DFS\UGHomes\g15R2152\Desktop\git_exercise\Morabaraba\Marabaraba\obj\Debug\Marabaraba.pdb
