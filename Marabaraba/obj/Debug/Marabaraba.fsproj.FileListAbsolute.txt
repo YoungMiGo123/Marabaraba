@@ -28,3 +28,12 @@ C:\Users\g16k4783\source\repos\Marabaraba3\Marabaraba\bin\Debug\Marabaraba.pdb
 C:\Users\g16k4783\source\repos\Marabaraba3\Marabaraba\bin\Debug\FSharp.Core.dll
 C:\Users\g16k4783\source\repos\Marabaraba3\Marabaraba\bin\Debug\System.ValueTuple.dll
 C:\Users\g16k4783\source\repos\Marabaraba3\Marabaraba\bin\Debug\FSharp.Core.xml
+\\ict.ru.ac.za\DFS\UGHomes\g16t1539\Desktop\2018\Morabaraba\Marabaraba\bin\Debug\Marabaraba.exe.config
+\\ict.ru.ac.za\DFS\UGHomes\g16t1539\Desktop\2018\Morabaraba\Marabaraba\bin\Debug\Marabaraba.XML
+\\ict.ru.ac.za\DFS\UGHomes\g16t1539\Desktop\2018\Morabaraba\Marabaraba\bin\Debug\Marabaraba.exe
+\\ict.ru.ac.za\DFS\UGHomes\g16t1539\Desktop\2018\Morabaraba\Marabaraba\bin\Debug\Marabaraba.pdb
+\\ict.ru.ac.za\DFS\UGHomes\g16t1539\Desktop\2018\Morabaraba\Marabaraba\bin\Debug\FSharp.Core.dll
+\\ict.ru.ac.za\DFS\UGHomes\g16t1539\Desktop\2018\Morabaraba\Marabaraba\bin\Debug\System.ValueTuple.dll
+\\ict.ru.ac.za\DFS\UGHomes\g16t1539\Desktop\2018\Morabaraba\Marabaraba\bin\Debug\FSharp.Core.xml
+\\ict.ru.ac.za\DFS\UGHomes\g16t1539\Desktop\2018\Morabaraba\Marabaraba\obj\Debug\Marabaraba.exe
+\\ict.ru.ac.za\DFS\UGHomes\g16t1539\Desktop\2018\Morabaraba\Marabaraba\obj\Debug\Marabaraba.pdb
