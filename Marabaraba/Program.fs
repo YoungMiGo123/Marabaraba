@@ -30,18 +30,6 @@ type GameBoard =
            *(Cell*Cell*Cell*Cell*Cell*Cell*Cell)
            *(Cell*Cell*Cell*Cell*Cell*Cell*Cell)
            *(Cell*Cell*Cell*Cell*Cell*Cell*Cell)
-
-type Result =
-| Ongoing of GameBoard
-| Winner of Cell * GameBoard
-| Draw
-
-type States =
- |Placing of (char*int) * (char*int)
- |Moving of (char*int) * string list
- |Flying of (char*int) * (char * int)
-
-
     
 let playerB = {Cows = [();();();();();();();();();();();();();()] ; Turn = false}
 let playerW = {Cows = [();();();();();();();();();();();();();()] ; Turn = false}
@@ -93,16 +81,10 @@ let printBoard (Board (r1, r2, r3, r4, r5, r6, r7)) =
       let printSepConners () = printfn "|\%s|%s/|" bk bk    
       printfn ""
          
-      
 
-type Game=
-       { A : char; B : char; C : char; D : char; E : char; F : char; G : char; H : char; I : char; J : char; K : char; L : char; M : char; N : char; O : char; P : char;
-           Q : char; R : char;  S : char; T : char; U : char; V : char; W : char; X : char }
-
-let Game = { A = 'A';  B = 'B'; C = 'C';D = 'D';E = 'E';F = 'F';G = 'G';H = 'H';I = 'I';J = 'J';K = 'K';L = 'L';M = 'M';N = 'N';O = 'O';P = 'P';Q = 'Q';R = 'R';S = 'S';T = 'T';U = 'U';
-           V = 'V';W = 'W';X = 'X';}
 
 type results =
+| Mill of GameBoard
 | Ongoing of GameBoard
 | Winner of Cell * GameBoard
 | Draw
@@ -154,96 +136,153 @@ let isBlank game position =
     | "G4", Board(_,_,_,_,_,_,(_,_,_,Blank,_,_,_)) -> true
     | "G7", Board(_,_,_,_,_,_,(_,_,_,_,_,_,Blank)) -> true
     | _ -> false 
+//Update the mill status 
+let updateMillStatus (inputMill: byref<int>) =
+     match inputMill with
+     | 0 -> inputMill <- 1
+     | _ -> inputMill <- 2
+      
+//Break up the mill checks into smaller mills
+let mutable BLine1 = 0
+let mutable BLine2 = 0
+let mutable BLine3 = 0
+let mutable BLine4 = 0
+let mutable BLine5 = 0 
+let mutable BLine6 = 0 
+let mutable BLine7 = 0 
+let mutable BLine8 = 0
 
-let MillBlack (game:GameBoard) =
-    match game with
-    | Board((CB,_,_,CB,_,_,CB),_,_,_,_,_,_) -> true //Line a
-    | Board(_,(_,CB,_,CB,_,CB,_),_,_,_,_,_) ->true //Line/Mill b
-    | Board(_,_,(_,_,CB,CB,CB,_,_),_,_,_,_) ->true //Line/Mill c
-    | Board(_,_,_,(CB,CB,CB,_,_,_,_),_,_,_) -> true //Line/Mill d
-    | Board(_,_,_,(_,_,_,_,CB,CB,CB),_,_,_) -> true//Line/Mill d
-    | Board(_,_,_,_,(_,_,CB,CB,CB,_,_),_,_) ->true//Line/Mill e
-    | Board(_,_,_,_,_,(_,CB,_,CB,_,CB,_),_) -> true //Line/Mill f
-    | Board(_,_,_,_,_,_,(CB,_,_,CB,_,_,CB)) -> true //Line/Mill g
-    | Board((CB,_,_,_,_,_,_),_,_,(CB,_,_,_,_,_,_),_,_,(CB,_,_,_,_,_,_)) -> true // Line/Mill Column 1
-    | Board(_,(_,CB,_,_,_,_,_),_,(_,CB,_,_,_,_,_),_,(_,CB,_,_,_,_,_),_) -> true //Line/Mill Column 2
-    | Board(_,_,(_,_,CB,_,_,_,_),(_,_,CB,_,_,_,_),(_,_,CB,_,_,_,_),_,_) -> true // Line/Mill Column 3
-    | Board((_,_,_,CB,_,_,_),(_,_,CB,_,_,_,_),(_,_,CB,_,_,_,_),_,_,_,_) ->true //Line/Mill Column 4
-    | Board(_,_,_,_,(_,_,_,CB,_,_,_),(_,_,_,CB,_,_,_),(_,_,_,CB,_,_,_)) ->true//Line/Mill Column 4
-    | Board(_,_,(_,_,_,_,CB,_,_),(_,_,_,_,CB,_,_),(_,_,_,_,CB,_,_),_,_) -> true //Line/Mill Column 5
-    | Board(_,(_,_,_,_,_,CB,_),_,(_,_,_,_,_,CB,_),_,(_,_,_,_,_,CB,_),_) ->true // Line/Mill Column 6
-    | Board((_,_,_,_,_,_,CB),_,_,(_,_,_,_,_,_,CB),_,_,(_,_,_,_,_,_,CB)) -> true // Line/Mill Column 7
-    | Board((CB,_,_,_,_,_,_), (_,CB,_,_,_,_,_), (_,_,CB,_,_,_,_),_,_,_,_) -> true // Line/Mill Diagonal A-C 
-    | Board((_,_,_,_,_,_,CB), (_,_,_,_,_,CB,_), (_,_,_,_,CB,_,_),_,_,_,_) ->true //Line/Mill diagonal C-A
-    | Board(_,_,_,_,(_,_,CB,_,_,_,_),(_,CB,_,_,_,_,_), (CB,_,_,_,_,_,_)) -> true //Line/Mill diagonal G-E
-    | Board(_,_,_,_,(_,_,_,_,CB,_,_),(_,_,_,_,_,CB,_), (_,_,_,_,_,_,CB)) -> true //Line/Mill diagonal E-G
+let MillCheck1 game  = 
+   let test =  
+       match game with 
+          | Board(_,_,_,_,_,(_,CB,_,CB,_,CB,_),_) -> updateMillStatus &BLine1 //Line f    
+          | Board((CB,_,_,CB,_,_,CB),_,_,_,_,_,_) -> updateMillStatus &BLine2  //Line a
+          | Board(_,(_,CB,_,CB,_,CB,_),_,_,_,_,_) -> updateMillStatus &BLine3 //Line/Mill b
+          | Board(_,_,(_,_,CB,CB,CB,_,_),_,_,_,_) -> updateMillStatus &BLine4 //Line/Mill c
+          | Board(_,_,_,(CB,CB,CB,_,_,_,_),_,_,_) -> updateMillStatus &BLine5 //Line/Mill d
+          | Board(_,_,_,(_,_,_,_,CB,CB,CB),_,_,_) -> updateMillStatus &BLine6 //Line/Mill d
+          | Board(_,_,_,_,(_,_,CB,CB,CB,_,_),_,_) -> updateMillStatus &BLine7//Line/Mill e
+          | Board(_,_,_,_,_,_,(CB,_,_,CB,_,_,CB)) -> updateMillStatus &BLine8 //Line/Mill g
+          | _ -> ()
+
+   match BLine1 = 1 || BLine2 =1|| BLine3=1 || BLine4=1 || BLine5=1 || BLine6=1 || BLine7=1 || BLine8 =1 with
+   | true -> true
+   | _ -> false
+
+let mutable BLine11 = 0
+let mutable BLine12 = 0
+let mutable BLine13 = 0
+let mutable BLine14 = 0
+let mutable BLine15 = 0 
+let mutable BLine16 = 0 
+let mutable BLine17 = 0 
+let mutable BLine18 = 0
+
+let MillCheck2 game = 
+    let test = 
+       match game with 
+          | Board((CB,_,_,_,_,_,_),_,_,(CB,_,_,_,_,_,_),_,_,(CB,_,_,_,_,_,_)) -> updateMillStatus &BLine11 // Line/Mill Column 1
+          | Board(_,(_,CB,_,_,_,_,_),_,(_,CB,_,_,_,_,_),_,(_,CB,_,_,_,_,_),_) -> updateMillStatus &BLine12 //Line/Mill Column 2
+          | Board(_,_,(_,_,CB,_,_,_,_),(_,_,CB,_,_,_,_),(_,_,CB,_,_,_,_),_,_) -> updateMillStatus &BLine13 // Line/Mill Column 3
+          | Board((_,_,_,CB,_,_,_),(_,_,CB,_,_,_,_),(_,_,CB,_,_,_,_),_,_,_,_) ->updateMillStatus &BLine14 //Line/Mill Column 4
+          | Board(_,_,_,_,(_,_,_,CB,_,_,_),(_,_,_,CB,_,_,_),(_,_,_,CB,_,_,_)) ->updateMillStatus &BLine15//Line/Mill Column 4
+          | Board(_,_,(_,_,_,_,CB,_,_),(_,_,_,_,CB,_,_),(_,_,_,_,CB,_,_),_,_) -> updateMillStatus &BLine16 //Line/Mill Column 5
+          | Board(_,(_,_,_,_,_,CB,_),_,(_,_,_,_,_,CB,_),_,(_,_,_,_,_,CB,_),_) ->updateMillStatus &BLine17 // Line/Mill Column 6
+          | Board((_,_,_,_,_,_,CB),_,_,(_,_,_,_,_,_,CB),_,_,(_,_,_,_,_,_,CB)) -> updateMillStatus &BLine18 // Line/Mill Column 7
+          | _ -> ()
+    match BLine11=1 || BLine12=1 || BLine13=1 || BLine14=1 || BLine15=1 || BLine16=1 || BLine17=1 || BLine18=1  with 
+    | true -> true
     | _ -> false
-let MillWhite(game: GameBoard) = 
-    match game with
-    | Board((CW,_,_,CW,_,_,CW),_,_,_,_,_,_) -> true //Line a
-    | Board(_,(_,CW,_,CW,_,CW,_),_,_,_,_,_) ->true //Line/Mill b
-    | Board(_,_,(_,_,CW,CW,CW,_,_),_,_,_,_) ->true //Line/Mill c
-    | Board(_,_,_,(CW,CW,CW,_,_,_,_),_,_,_) -> true //Line/Mill d
-    | Board(_,_,_,(_,_,_,_,CW,CW,CW),_,_,_) -> true//Line/Mill d
-    | Board(_,_,_,_,(_,_,CW,CW,CW,_,_),_,_) ->true//Line/Mill e
-    | Board(_,_,_,_,_,(_,CW,_,CW,_,CW,_),_) -> true //Line/Mill f
-    | Board(_,_,_,_,_,_,(CW,_,_,CW,_,_,CW)) -> true //Line/Mill g
-    | Board((CW,_,_,_,_,_,_),_,_,(CW,_,_,_,_,_,_),_,_,(CW,_,_,_,_,_,_)) -> true // Line/Mill Column 1
-    | Board(_,(_,CW,_,_,_,_,_),_,(_,CW,_,_,_,_,_),_,(_,CW,_,_,_,_,_),_) -> true //Line/Mill Column 2
-    | Board(_,_,(_,_,CW,_,_,_,_),(_,_,CW,_,_,_,_),(_,_,CW,_,_,_,_),_,_) -> true // Line/Mill Column 3
-    | Board((_,_,_,CW,_,_,_),(_,_,CW,_,_,_,_),(_,_,CW,_,_,_,_),_,_,_,_) ->true //Line/Mill Column 4
-    | Board(_,_,_,_,(_,_,_,CW,_,_,_),(_,_,_,CW,_,_,_),(_,_,_,CW,_,_,_)) ->true//Line/Mill Column 4
-    | Board(_,_,(_,_,_,_,CW,_,_),(_,_,_,_,CW,_,_),(_,_,_,_,CW,_,_),_,_) -> true //Line/Mill Column 5
-    | Board(_,(_,_,_,_,_,CW,_),_,(_,_,_,_,_,CW,_),_,(_,_,_,_,_,CW,_),_) ->true // Line/Mill Column 6
-    | Board((_,_,_,_,_,_,CW),_,_,(_,_,_,_,_,_,CW),_,_,(_,_,_,_,_,_,CW)) -> true // Line/Mill Column 7
-    | Board((CW,_,_,_,_,_,_), (_,CW,_,_,_,_,_), (_,_,CW,_,_,_,_),_,_,_,_) -> true // Line/Mill Diagonal A-C 
-    | Board((_,_,_,_,_,_,CW), (_,_,_,_,_,CW,_), (_,_,_,_,CW,_,_),_,_,_,_) ->true //Line/Mill diagonal C-A
-    | Board(_,_,_,_,(_,_,CW,_,_,_,_),(_,CW,_,_,_,_,_), (CW,_,_,_,_,_,_)) -> true //Line/Mill diagonal G-E
-    | Board(_,_,_,_,(_,_,_,_,CW,_,_),(_,_,_,_,_,CW,_), (_,_,_,_,_,_,CW)) -> true //Line/Mill diagonal E-G
-    | _ -> false 
 
-(*let makeMove symbol (Board (r1, r2,r3,r4,r5,r6,r7)) pos = 
-      let newBoard = 
-         let changeCol col (a,b,c,d,e,f,g) = 
-            match col with 
-            | 0 -> symbol,b,c,d,e,f,g
-            | 1 -> a,symbol,c,d,e,f,g
-            | 2 -> a,b,symbol,d,e,f,g
-            | 3 -> a,b, c, symbol,e,f,g
-            | 4 -> a,b,c,d,symbol,f,g
-            | 5 -> a,b,c,d,e,symbol,g
-            | 6 -> a,b,c,d,e,f,symbol
-            | _ -> failwith "Error occured"
-         let data = 
-             match pos with
-             | "A1" -> changeCol 0 r1, r2,r3,r4,r5,r6,r7  //1
-             | "A4" -> changeCol 3 r1, r2,r3,r4,r5,r6,r7 //2
-             | "A7" -> changeCol 6 r1, r2,r3,r4,r5,r6,r7 //3
-             | "B2" -> r1, changeCol 1 r2,r3,r4,r5,r6,r7 //4
-             | "B4" -> r1, changeCol 3 r2,r3,r4,r5,r6,r7 //5
-             | "B6" -> r1, changeCol 5 r2,r3,r4,r5,r6,r7 //6 
-             | "C3" -> r1, r2, changeCol 2 r3,r4,r5,r6,r7 //7
-             | "C4" -> r1, r2, changeCol 3 r3,r4,r5,r6,r7 //8
-             | "C5" -> r1, r2, changeCol 4 r3,r4,r5,r6,r7 //9
-             | "D1" -> r1, r2,r3,changeCol 0 r4,r5,r6,r7 //10
-             | "D2" -> r1, r2,r3, changeCol 1 r4,r5,r6,r7 //11
-             | "D3" -> r1, r2,r3, changeCol 2 r4,r5,r6,r7 //12
-             | "D5" -> r1, r2,r3, changeCol 4 r4,r5,r6,r7 //13
-             | "D6" -> r1, r2,r3,changeCol 5 r4,r5,r6,r7 //14
-             | "D7" -> r1, r2,r3, changeCol 6 r4,r5,r6,r7 //15
-             | "E3" -> r1, r2,r3,r4, changeCol 2 r5,r6,r7 //16
-             | "E4" -> r1, r2,r3,r4,changeCol 3 r5,r6,r7 //17
-             | "E5" -> r1, r2,r3,r4,changeCol 4 r5,r6,r7 //18
-             | "F2" -> r1, r2,r3,r4,r5, changeCol 1 r6,r7 //19
-             | "F4" ->  r1, r2,r3,r4,r5,changeCol 3 r6,r7 //20
-             | "F6" ->  r1, r2,r3,r4,r5, changeCol 5 r6,r7 //21
-             | "G1" ->  r1, r2,r3,r4,r5,r6, changeCol 0 r7 //22
-             | "G4" ->  r1, r2,r3,r4,r5, r6, changeCol 3 r7 //23
-             | "G7" ->  r1, r2,r3,r4,r5,r6, changeCol 5 r7 //24
-             | _ -> failwith "error occured in changing columns"
-         Board data
-      gamecheck newBoard
-*)
+let mutable Bdiagonal1 = 0
+let mutable Bdiagonal2 = 0
+let mutable Bdiagonal3 = 0
+let mutable Bdiagonal4 = 0
+
+let MillCheck3 (game:GameBoard) =
+    let test = 
+          match game with
+          | Board((CB,_,_,_,_,_,_), (_,CB,_,_,_,_,_), (_,_,CB,_,_,_,_),_,_,_,_) ->updateMillStatus &Bdiagonal1 // Line/Mill Bdiagonal A-C 
+          | Board((_,_,_,_,_,_,CB), (_,_,_,_,_,CB,_), (_,_,_,_,CB,_,_),_,_,_,_) ->updateMillStatus &Bdiagonal2 //Line/Mill Bdiagonal C-A
+          | Board(_,_,_,_,(_,_,CB,_,_,_,_),(_,CB,_,_,_,_,_), (CB,_,_,_,_,_,_)) -> updateMillStatus &Bdiagonal3 //Line/Mill Bdiagonal G-E
+          | Board(_,_,_,_,(_,_,_,_,CB,_,_),(_,_,_,_,_,CB,_), (_,_,_,_,_,_,CB)) -> updateMillStatus &Bdiagonal4 //Line/Mill Bdiagonal E-G
+          | _ -> ()
+   
+    match Bdiagonal1=1 || Bdiagonal2=2 || Bdiagonal3=1 || Bdiagonal4=1 with
+         | true -> true
+         | _ -> false
+
+///White Cows
+
+//Break up the mill checks into smaller mills
+let mutable WLine1 = 0
+let mutable WLine2 = 0
+let mutable WLine3 = 0
+let mutable WLine4 = 0
+let mutable WLine5 = 0 
+let mutable WLine6 = 0 
+let mutable WLine7 = 0 
+let mutable WLine8 = 0
+
+let MillCheck4 game  = 
+   let test =  
+       match game with 
+          | Board(_,_,_,_,_,(_,CB,_,CB,_,CB,_),_) -> updateMillStatus &WLine1 //Line f    
+          | Board((CB,_,_,CB,_,_,CB),_,_,_,_,_,_) -> updateMillStatus &WLine2  //Line a
+          | Board(_,(_,CB,_,CB,_,CB,_),_,_,_,_,_) -> updateMillStatus &WLine3 //Line/Mill b
+          | Board(_,_,(_,_,CB,CB,CB,_,_),_,_,_,_) -> updateMillStatus &WLine4 //Line/Mill c
+          | Board(_,_,_,(CB,CB,CB,_,_,_,_),_,_,_) -> updateMillStatus &WLine5 //Line/Mill d
+          | Board(_,_,_,(_,_,_,_,CB,CB,CB),_,_,_) -> updateMillStatus &WLine6 //Line/Mill d
+          | Board(_,_,_,_,(_,_,CB,CB,CB,_,_),_,_) -> updateMillStatus &WLine7//Line/Mill e
+          | Board(_,_,_,_,_,_,(CB,_,_,CB,_,_,CB)) -> updateMillStatus &WLine8 //Line/Mill g
+          | _ -> ()
+
+   match WLine1 = 1 || WLine2 =1|| WLine3=1 || WLine4=1 || WLine5=1 || WLine6=1 || WLine7=1 || WLine8 =1 with
+   | true -> true
+   | _ -> false
+
+let mutable WLine11 = 0
+let mutable WLine12 = 0
+let mutable WLine13 = 0
+let mutable WLine14 = 0
+let mutable WLine15 = 0 
+let mutable WLine16 = 0 
+let mutable WLine17 = 0 
+let mutable WLine18 = 0
+
+let MillCheck5 game = 
+    let test = 
+       match game with 
+          | Board((CB,_,_,_,_,_,_),_,_,(CB,_,_,_,_,_,_),_,_,(CB,_,_,_,_,_,_)) -> updateMillStatus &WLine11 // Line/Mill Column 1
+          | Board(_,(_,CB,_,_,_,_,_),_,(_,CB,_,_,_,_,_),_,(_,CB,_,_,_,_,_),_) -> updateMillStatus &WLine12 //Line/Mill Column 2
+          | Board(_,_,(_,_,CB,_,_,_,_),(_,_,CB,_,_,_,_),(_,_,CB,_,_,_,_),_,_) -> updateMillStatus &WLine13 // Line/Mill Column 3
+          | Board((_,_,_,CB,_,_,_),(_,_,CB,_,_,_,_),(_,_,CB,_,_,_,_),_,_,_,_) ->updateMillStatus &WLine14 //Line/Mill Column 4
+          | Board(_,_,_,_,(_,_,_,CB,_,_,_),(_,_,_,CB,_,_,_),(_,_,_,CB,_,_,_)) ->updateMillStatus &WLine15//Line/Mill Column 4
+          | Board(_,_,(_,_,_,_,CB,_,_),(_,_,_,_,CB,_,_),(_,_,_,_,CB,_,_),_,_) -> updateMillStatus &WLine16 //Line/Mill Column 5
+          | Board(_,(_,_,_,_,_,CB,_),_,(_,_,_,_,_,CB,_),_,(_,_,_,_,_,CB,_),_) ->updateMillStatus &WLine17 // Line/Mill Column 6
+          | Board((_,_,_,_,_,_,CB),_,_,(_,_,_,_,_,_,CB),_,_,(_,_,_,_,_,_,CB)) -> updateMillStatus &WLine18 // Line/Mill Column 7
+          | _ -> ()
+    match WLine11=1 || WLine12=1 || WLine13=1 || WLine14=1 || WLine15=1 || WLine16=1 || WLine17=1 || WLine18=1  with 
+    | true -> true
+    | _ -> false
+
+let mutable Wdiagonal1 = 0
+let mutable Wdiagonal2 = 0
+let mutable Wdiagonal3 = 0
+let mutable Wdiagonal4 = 0
+
+let MillCheck6 (game:GameBoard) =
+    let test = 
+          match game with
+          | Board((CB,_,_,_,_,_,_), (_,CB,_,_,_,_,_), (_,_,CB,_,_,_,_),_,_,_,_) ->updateMillStatus &Wdiagonal1 // Line/Mill Wdiagonal A-C 
+          | Board((_,_,_,_,_,_,CB), (_,_,_,_,_,CB,_), (_,_,_,_,CB,_,_),_,_,_,_) ->updateMillStatus &Wdiagonal2 //Line/Mill Wdiagonal C-A
+          | Board(_,_,_,_,(_,_,CB,_,_,_,_),(_,CB,_,_,_,_,_), (CB,_,_,_,_,_,_)) -> updateMillStatus &Wdiagonal3 //Line/Mill Wdiagonal G-E
+          | Board(_,_,_,_,(_,_,_,_,CB,_,_),(_,_,_,_,_,CB,_), (_,_,_,_,_,_,CB)) -> updateMillStatus &Wdiagonal4 //Line/Mill Wdiagonal E-G
+          | _ -> ()
+   
+    match Wdiagonal1=1 || Wdiagonal2=2 || Wdiagonal3=1 || Wdiagonal4=1 with
+         | true -> true
+         | _ -> false
 
 let test = inputCheck "f6" 
 //let test2 = isBlank ga
@@ -267,12 +306,13 @@ let printOutValidCoordinates =
                    | _ -> printfn "Done"
               //| [[]]-> printfn "Not correct input" 
           innerHelp actCoardinates 0  
-                      
-
-
+let Check (game: GameBoard)  =
+      match MillCheck1 game || MillCheck2 game || MillCheck3 game with
+      | true -> Mill game  
+      | _ -> Ongoing game               
 
 let makeMove symbol (Board (r1, r2,r3,r4,r5,r6,r7)) pos = 
-      let newBoard = 
+       let newBoard = 
          let changeCol col (a,b,c,d,e,f,g) = 
             match col with 
             | 0 -> symbol,b,c,d,e,f,g
@@ -311,25 +351,54 @@ let makeMove symbol (Board (r1, r2,r3,r4,r5,r6,r7)) pos =
              | "G7" ->  r1, r2,r3,r4,r5,r6, changeCol 6 r7
              | _ -> failwith "error occured in changing columns"
          Board data
-      Ongoing newBoard
+       Check newBoard
+// Print out board in destroy before anything else
+// Get inputs from this method
+let DestroyPiece (Board (r1, r2,r3,r4,r5,r6,r7)) = 
+     printfn "Which cow would you like to destroy: "
+     let pos = Console.ReadLine()
+    
+     let newBoard = 
+         let changeCol col (a,b,c,d,e,f,g) = 
+            match col with 
+            | 0 -> Blank,b,c,d,e,f,g
+            | 1 -> a,Blank,c,d,e,f,g
+            | 2 -> a,b,Blank,d,e,f,g
+            | 3 -> a,b, c, Blank,e,f,g
+            | 4 -> a,b,c,d,Blank,f,g
+            | 5 -> a,b,c,d,e,Blank,g
+            | 6 -> a,b,c,d,e,f,Blank
+            | _ -> failwith "Error occured"
+         let data = 
+             match pos with
+             | "A1" -> changeCol 0 r1, r2,r3,r4,r5,r6,r7
+             | "A4" -> changeCol 3 r1, r2,r3,r4,r5,r6,r7
+             | "A7" -> changeCol 6 r1, r2,r3,r4,r5,r6,r7
+             | "B2" -> r1, changeCol 1 r2,r3,r4,r5,r6,r7
+             | "B4" -> r1, changeCol 3 r2,r3,r4,r5,r6,r7
+             | "B6" -> r1, changeCol 5 r2,r3,r4,r5,r6,r7
+             | "C3" -> r1, r2, changeCol 2 r3,r4,r5,r6,r7
+             | "C4" -> r1, r2, changeCol 3 r3,r4,r5,r6,r7
+             | "C5" -> r1, r2, changeCol 4 r3,r4,r5,r6,r7
+             | "D1" -> r1, r2,r3,changeCol 0 r4,r5,r6,r7
+             | "D2" -> r1, r2,r3, changeCol 1 r4,r5,r6,r7
+             | "D3" -> r1, r2,r3, changeCol 2 r4,r5,r6,r7
+             | "D5" -> r1, r2,r3, changeCol 4 r4,r5,r6,r7
+             | "D6" -> r1, r2,r3,changeCol 5 r4,r5,r6,r7
+             | "D7" -> r1, r2,r3, changeCol 6 r4,r5,r6,r7
+             | "E3" -> r1, r2,r3,r4, changeCol 2 r5,r6,r7
+             | "E4" -> r1, r2,r3,r4,changeCol 3 r5,r6,r7
+             | "E5" -> r1, r2,r3,r4,changeCol 4 r5,r6,r7
+             | "F2" -> r1, r2,r3,r4,r5, changeCol 1 r6,r7
+             | "F4" ->  r1, r2,r3,r4,r5,changeCol 3 r6,r7
+             | "F6" ->  r1, r2,r3,r4,r5, changeCol 5 r6,r7
+             | "G1" ->  r1, r2,r3,r4,r5,r6, changeCol 0 r7
+             | "G4" ->  r1, r2,r3,r4,r5, r6, changeCol 3 r7
+             | "G7" ->  r1, r2,r3,r4,r5,r6, changeCol 6 r7
+             | _ -> failwith "error occured in changing columns"
+         Board data
+     newBoard
 
-
-let Shoot (position:string) (game:GameBoard) player = 
-    let black = 
-      match (MillBlack game) with 
-      | true -> 
-            match (isBlank game position) with
-            | false -> makeMove player game position 
-            | _ -> Ongoing game
-      | _ -> Ongoing game
-    let white = 
-        match (MillWhite game) with 
-          | true -> 
-            match (isBlank game position) with
-            | false -> makeMove player game position 
-            | _ -> Ongoing game
-          | _ -> Ongoing game
-    white
 let rec run player game =
     // need to find the blank cells that can be used...
     clearboard()
@@ -342,7 +411,7 @@ let rec run player game =
     | "F2" | "F4" | "F6" | "G1" | "G4" | "G7"  ->
            // let i = int (string n)
             match isBlank game n with
-             | true -> makeMove player game n
+             | true -> makeMove player game n //Shoot n game player
              | _ ->
                   printfn "Invalid Input, Please re-enter position" 
                   run player game
@@ -387,6 +456,10 @@ let rec runGame currentPlayer game =
         | "Y" | "y" -> runGame CB blankBoard
         | _ -> ()
     match run currentPlayer game with
+    |Mill newBoard ->
+         printfn "Enter position of cow you'd like to destroy: "
+         let var = DestroyPiece newBoard 
+         runGame (swapPlayer currentPlayer) var
     | Ongoing newBoard -> runGame (swapPlayer currentPlayer) newBoard
     | Winner (player, board) ->
         printBoard board
@@ -395,6 +468,11 @@ let rec runGame currentPlayer game =
     | Draw ->
         printfn "Draaaaw"
         playAgain ()
+  
+        
+
+         //let x = Console.ReadLine()
+
 (*let charcheck c =
      match c  with
      | 'A'| 'B'|'C'|'D'|'E'|'F'|'a'| 'b'|'c'|'d'|'e'|'f' -> true
