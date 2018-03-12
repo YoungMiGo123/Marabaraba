@@ -9,17 +9,21 @@ type Coordinates =
              X: int
              Y: int
          }
-type Player =
-         {
-           Cows: int //number of cows lefts during placing
-           Turn: bool //player's turn to play?
-           Cells : string list
-         }
 
 type Cell = //Does particular cell on the board hold white cow, black cow or is it black
 | CW
 | CB
 | Blank
+
+type Player =
+         {
+           Cows: int //number of cows lefts during placing
+           Turn: bool //player's turn to play?
+           Cells : string list
+           Who : Cell
+         }
+
+
 
 
 
@@ -39,8 +43,8 @@ type results =          //results state of the current game
 | Winner of Cell * GameBoard
 | Draw
 
-let playerB = {Cows = 1 ; Turn = false; Cells =[] }//initialisng player information (each startin with twelve cows )
-let playerW = {Cows = 1 ; Turn = false; Cells =[]}
+let playerB = {Cows = 1 ; Turn = false; Cells =[] ; Who = CB  }//initialisng player information (each startin with twelve cows )
+let playerW = {Cows = 1 ; Turn = false; Cells =[] ; Who = CW}
 
 //FUNCTIONS
 let printBoard (Board (r1, r2, r3, r4, r5, r6, r7)) = //printing the board onto the screen. as the user will see it.
@@ -104,12 +108,13 @@ let swapPlayer x=
       | CW -> CB
       | Blank -> failwith "A FATAL ERROR OCCURED"
 
-let inputCheck (coordinate) =       //validating user input
-      match String.length (coordinate) with
+let inputCheck (coordinate:string) =       //validating user input
+      let n = coordinate.ToUpper ()
+      match String.length (n) with
       | 2 -> 
-            match Char.IsLetter(coordinate.[0]) && coordinate.[0]<'g' with 
+            match Char.IsLetter(n.[0]) && n.[0]<'g' with 
             | true -> 
-                  match Char.IsDigit(coordinate.[1]) &&  ((Int32.Parse(string coordinate.[1]) >= 0) && Int32.Parse(string coordinate.[1]) < 8)  with
+                  match Char.IsDigit(n.[1]) &&  ((Int32.Parse(string n.[1]) >= 0) && Int32.Parse(string n.[1]) < 8)  with
                       | true -> true
                       | _ -> false
             | _ -> false
@@ -369,9 +374,10 @@ let notown pos =            //makes sure you dont destroy your own cow
     
 
 let DestroyPiece (Board (r1, r2,r3,r4,r5,r6,r7))  = 
-     printfn "Which cow would you like to destroy: "
-     let pos = Console.ReadLine()
-     match (inputCheck pos = true) with// && (notown pos = true) with 
+     //printfn "Which cow would you like to destroy: "
+     let n = Console.ReadLine()
+     let pos = n.ToUpper ()
+     match (inputCheck pos = true)  with //&& (notown pos = true) with 
         |true ->  
              let newBoard =             //Creates a new (updated) board with deleted cow
                  let changeCol col (a,b,c,d,e,f,g) = 
@@ -422,7 +428,7 @@ let own pos =
 
 let movingCow (Board (r1, r2,r3,r4,r5,r6,r7)) = // start moving cow once number of cows on the side = 0
      printfn "Which cow would you like to move [<Letter><Number>]: "
-     let pos = Console.ReadLine()
+     let pos = Console.ReadLine() 
      match (inputCheck pos = true) && (own pos = true) with 
         |true ->  
              let newBoard =             //Creates a new (updated) board with deleted cow
@@ -465,14 +471,9 @@ let movingCow (Board (r1, r2,r3,r4,r5,r6,r7)) = // start moving cow once number 
                      | _ -> failwith "error occured in changing columns"
                  Board data
              newBoard
-        |_ ->  failwith "Cannot destroy own cow"
+        |_ ->  failwith "error occured in changing columns"
 
 
-let updateplayer p n = 
-    match p with 
-    |CB -> {playerB with Turn = true; Cows = (playerB.Cows)-1; Cells = n::playerB.Cells}
-    |CW -> {playerW with Turn = true; Cows = (playerW.Cows)-1; Cells = n::playerW.Cells}
-    |_ -> failwith "Invalid input" 
 
 let cowsleft = 
     match (playerB.Cows < 1 && playerB.Turn = true) || (playerW.Cows < 1  && playerW.Turn = true) with
@@ -489,14 +490,17 @@ let rec run player game =
                printfn " Type the Co-ordinates [<LETTER><NUMBER>] of the cell that you want to play into." 
                let b = System.Console.ReadLine() // Co-ordinate for cow from user
                let n = b.ToUpper ()
-               updateplayer player n
+               //updateplayer player n
                match n with
                | "A1"  | "A4" | "A7" | "a7" | "B2" |"B4"  | "B6"  | "C3" | "C4" | "C5" 
                | "D1" | "D2" | "D3" | "D5" | "D6" | "D7" | "E3" | "E4" | "E5"
                | "F2" | "F4" | "F6" | "G1" | "G4" | "G7"  ->
                         // let i = int (string n)
                              match isBlank game n with
-                              | true -> makeMove player game n  //Shoot n game player
+                              | true -> 
+                                   let playerB = {playerB with Cows = 0 ; Turn = false; Cells = n::playerB.Cells }
+                                   let playerW = {playerW with Cows = 0 ; Turn = false; Cells = n::playerB.Cells }
+                                   makeMove player game n  //Shoot n game player
                               | _ ->
                                    printfn "Invalid Input, Please re-enter position" 
                                    run player game
@@ -507,7 +511,7 @@ let rec run player game =
 
                 let b = System.Console.ReadLine() // Co-ordinate for cow from user
                 let n = b.ToUpper ()
-                updateplayer player n
+                //updateplayer player n
                 match n with
                  | "A1"  | "A4" | "A7" | "a7" | "B2" |"B4"  | "B6"  | "C3" | "C4" | "C5" 
                  | "D1" | "D2" | "D3" | "D5" | "D6" | "D7" | "E3" | "E4" | "E5"
@@ -516,6 +520,7 @@ let rec run player game =
                          match isBlank game n with
                           | true -> 
                                 makeMove player game n  //Shoot n game player
+                                
                           | _ ->
                                printfn "Invalid Input, Please re-enter position" 
                                run player game
@@ -552,18 +557,26 @@ rules()
 printfn " Please press [P] to play the game!"
 let getinput()  = (System.Console.ReadKey true).KeyChar
  
+let updateplayer p n = 
+    match p with 
+    |CB -> {Cows = 0 ; Turn = true; Cells = n::playerB.Cells ; Who = CB  }
+    |CW -> {Cows = 0 ; Turn = true; Cells = n::playerW.Cells ; Who = CW  }
+    |_ -> failwith "Invalid input" 
 
 
-let rec runGame currentPlayer game =
+let rec runGame currentPlayer game  =
     let playAgain () =
         printfn "Play again? [y/N] "
         match System.Console.ReadLine() with
         | "Y" | "y" -> runGame CB blankBoard
         | _ -> ()
+ 
     match run currentPlayer game with
-    |Ongoing newBoard -> runGame (swapPlayer currentPlayer) newBoard
+    |Ongoing newBoard -> 
+         //updateplayer currentPlayer n 
+         runGame (swapPlayer currentPlayer) newBoard 
     |Mill newBoard ->
-         printfn "Enter position of cow you'd like to destroy: "
+         printfn "Enter position of cow you'd like to destroy [<Letter><Number>]: "
          let var = DestroyPiece newBoard 
          runGame (swapPlayer currentPlayer) var
     |Winner (player, board) ->
