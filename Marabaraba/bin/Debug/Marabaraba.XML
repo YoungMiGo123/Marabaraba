@@ -2,15 +2,5 @@
 <doc>
 <assembly><name>Marabaraba</name></assembly>
 <members>
-<member name="T:Program.Coordinates">
-<summary>
-DATA STRUCTURES 
-</summary>
-</member>
-<member name="P:Program.WLine1">
-<summary>
-White Cows
-</summary>
-</member>
 </members>
 </doc>
