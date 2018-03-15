@@ -46,3 +46,12 @@ C:\Users\g16k4783\source\repos\Marabaraba3\Marabaraba\bin\Debug\FSharp.Core.xml
 \\ict.ru.ac.za\DFS\UGHomes\g15r2152\Desktop\Morabaraba\Marabaraba\bin\Debug\FSharp.Core.dll
 \\ict.ru.ac.za\DFS\UGHomes\g15r2152\Desktop\Morabaraba\Marabaraba\bin\Debug\System.ValueTuple.dll
 \\ict.ru.ac.za\DFS\UGHomes\g15r2152\Desktop\Morabaraba\Marabaraba\bin\Debug\FSharp.Core.xml
+J:\Morabaraba\Marabaraba\bin\Debug\Marabaraba.exe.config
+J:\Morabaraba\Marabaraba\bin\Debug\Marabaraba.XML
+J:\Morabaraba\Marabaraba\bin\Debug\Marabaraba.exe
+J:\Morabaraba\Marabaraba\bin\Debug\Marabaraba.pdb
+J:\Morabaraba\Marabaraba\bin\Debug\FSharp.Core.dll
+J:\Morabaraba\Marabaraba\bin\Debug\System.ValueTuple.dll
+J:\Morabaraba\Marabaraba\bin\Debug\FSharp.Core.xml
+J:\Morabaraba\Marabaraba\obj\Debug\Marabaraba.exe
+J:\Morabaraba\Marabaraba\obj\Debug\Marabaraba.pdb
