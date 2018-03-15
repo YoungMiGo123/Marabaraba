@@ -86,7 +86,7 @@ let conditionToString2 value =
     | Basic CW -> "W"
     | _ -> ""
 //FUNCTIONS
-//Fix the method to print out the board
+// A function to print out any given board
 let printBoard (board:GameBoard) = //printing the board onto the screen. as the user will see it.
       //System.Console.Clear()
       let liz = "_____" //5
@@ -119,14 +119,14 @@ let printBoard (board:GameBoard) = //printing the board onto the screen. as the 
 
 
 let clearboard()=System.Console.Clear()
-
+//Change player
 let swapPlayer x= 
       match x with 
       | CB -> CW
       | CW -> CB
      
-
-let inputCheck (coordinate:string) =       //validating user input
+//validating user input
+let inputCheck (coordinate:string) =       
       let n = coordinate.ToUpper ()
       match String.length (n) with
       | 2 -> 
@@ -138,16 +138,12 @@ let inputCheck (coordinate:string) =       //validating user input
             | _ -> false
       | _ -> false
 
-//Check the the opposition 
-let getEnemy enemy =
-     match enemy with
-     | CB -> CW
-     | CW-> CB 
+
 //let CBList, CWList = List.partition (fun player -> player.cond = Basic CB) board.Board 
      
 // Write out a method to update a certain tile and return a new board with all values
    //Unlike imperative programming, you can't modify values so just make a new board work with it
-
+// Update a given cell in the gameboard with that's cell's new codition state and return a new board
 let UpdateCell (theBoard: GameBoard) pos conditionState = 
           let mapCelltoCell (obj:Tile) =  
                 match obj.pos = pos with
@@ -155,14 +151,11 @@ let UpdateCell (theBoard: GameBoard) pos conditionState =
                 | false -> obj
           let replaceState = (List.map (mapCelltoCell) theBoard.Board)
           {theBoard with Board = replaceState}
-
+//Functions that filter all the basic pieces into two lists.
 let returnListBlack (board:GameBoard) = List.filter (fun player -> player.cond = Basic CB) board.Board 
 let returnListWhite (board:GameBoard) = List.filter (fun player -> player.cond = Basic CW) board.Board 
 
-let ObtainCurrAvailPlayerSpaces board player = 
-     let filteredList = List.filter ( fun input -> input.cond = Basic (player)) board
-     filteredList
-
+// Update the remaining pieces, of a player! once it reaches 3 pieces 
 let updateBoardToSuperSayin (board:GameBoard) player (condition:SuperPowerCow) =
       let stringVal = conditionToString2 player
       let mapCelltoCell (obj) =  
@@ -172,7 +165,7 @@ let updateBoardToSuperSayin (board:GameBoard) player (condition:SuperPowerCow) =
       let newState = List.map(mapCelltoCell) board.Board 
       {board with Board = newState}
 
- //CHWCK ALL THE POSITION THAT COW CAN REACH WITH ONE MOVE
+ //CHECK ALL THE POSITION THAT COW CAN REACH FROM CURRENT POSITION
 let checkCellsAroundPosition pos = 
           match pos with 
           | "a1" -> ["d1"; "b2"; "a4"]
@@ -209,12 +202,8 @@ let checkCellsAroundPosition pos =
 
           | _ -> []
 
-let tiletostring (tile : Tile) =
-    let ss = tile.pos 
-    let s  = conditionToString tile.cond
-    ss + s
-    
 
+// Find the state of any given position from the board
 let findState (board: Tile list) position =
           let listGetStateItems = (List.tryFind(fun actItem -> actItem.pos = position) board).Value.cond
           listGetStateItems 
@@ -223,7 +212,8 @@ let findState (board: Tile list) position =
       
 //let boardtostring board = 
     
- // Break the white and black cows into two lists        
+ // Break the white and black cows into two lists   
+ // Destroy any given cow, and return a new board
 let destroycow board =
     printfn "Please enter posision of cow you want to chow" 
     let n = Console.ReadLine()
@@ -242,11 +232,12 @@ let destroycow board =
 
     |_ -> UpdateCell board n Blank //
 
-
+// Make the move based on the position and return a new board 
 let makeMove player pos game =
     let newBoard = UpdateCell (game) pos (Basic player)
 
     newBoard
+// Destroy a piece based on position and return a new board
 let DestroyPiece pos game =
     let newBoard = UpdateCell (game) pos (Blank)
     
@@ -548,8 +539,9 @@ let msgError = "Invalid output, please choose a different cell"
 let main argv = 
     printfn "%A" argv
     let r = getinput ()
+    
     match r with
-       |'p'|'P' -> 
+       |'p'|'P'|_ -> 
             clearboard()
             printBoard (board) 
             run CB board [[]]  //start with 24 cows, 12 for each. when this value reaches 0, go from placing to moving
