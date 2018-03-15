@@ -1,5 +1,5 @@
 ﻿open System
-open System.Security.Cryptography.X509Certificates
+//open System.Security.Cryptography.X509Certificates
 
 // Learn more about F# at http://fsharp.org
 // See the 'F# Tutorial' project for more help.
@@ -31,7 +31,9 @@ type results =          //results state of the current game
 |Ongoing of GameBoard
 |Draw
 
-
+type Mill = 
+| Available
+| Used
 
 
 
@@ -46,7 +48,7 @@ let board =
                               {pos = "f2"; cond = Blank}; {pos = "f4"; cond = Blank}; {pos = "f6"; cond = Blank};
                               {pos = "g1"; cond = Blank}; {pos = "g4"; cond = Blank}; {pos = "g7"; cond = Blank};
                            ]
-                    bullets = (12,12)
+                    bullets = (1,1)
                  }
 
 let mills = [
@@ -77,7 +79,7 @@ let PlayerToString value =
        match value with 
           | CB -> "B"
           | CW -> "W"
-          | _ -> "O"
+         
 
 
 let conditionToString value =
@@ -87,7 +89,12 @@ let conditionToString value =
     | Basic CW -> "W"
     | SuperSayin CB -> "B"
     | SuperSayin CW -> "W"
-    | _ -> ""
+let conditionToString2 value =
+    match value with
+    | Blank -> "O"
+    | Basic CB -> "B"
+    | Basic CW -> "W"
+
 //FUNCTIONS
 //Fix the method to print out the board
 let printBoard (board:GameBoard) = //printing the board onto the screen. as the user will see it.
@@ -128,7 +135,7 @@ let swapPlayer x=
       match x with 
       | CB -> CW
       | CW -> CB
-      | _ -> failwith "A FATAL ERROR OCCURED"
+     
 
 let inputCheck (coordinate:string) =       //validating user input
       let n = coordinate.ToUpper ()
@@ -147,7 +154,8 @@ let getEnemy enemy =
      match enemy  with
      | CB -> CW
      | CW-> CB 
-
+//let CBList, CWList = List.partition (fun player -> player.cond = Basic CB) board.Board 
+     
 // Write out a method to update a certain tile and return a new board with all values
    //Unlike imperative programming, you can't modify values so just make a new board work with it
 
@@ -159,11 +167,21 @@ let UpdateCell (theBoard: GameBoard) pos conditionState =
           let replaceState = (List.map (mapCelltoCell) theBoard.Board)
           {theBoard with Board = replaceState}
 
-let CBList, CWList = List.partition (fun player -> player.cond = Basic CB) board.Board 
+let returnListBlack (board:GameBoard) = List.filter (fun player -> player.cond = Basic CB) board.Board 
+let returnListWhite (board:GameBoard) = List.filter (fun player -> player.cond = Basic CW) board.Board 
 
 let ObtainCurrAvailPlayerSpaces board player = 
      let filteredList = List.filter ( fun input -> input.cond = Basic (player)) board
      filteredList
+
+let updateBoardToSuperSayin (board:GameBoard) player (condition:SuperPowerCow)  =
+      let stringVal = conditionToString2 player
+      let mapCelltoCell (obj) =  
+                match (obj.cond <> Blank && stringVal = "B") || (obj.cond <> Blank && stringVal = "W") with
+                | true -> {obj with cond=condition}
+                | false -> obj
+      let newState = List.map(mapCelltoCell) board.Board 
+      {board with Board = newState}
 
 let checkCellsAroundPosition pos = 
           match pos with 
@@ -199,23 +217,23 @@ let checkCellsAroundPosition pos =
           |"g4" -> ["g1"; "f4"; "g7"]
           | "g7" -> ["g4"; "f6"; "d7"]
 
-          | _ -> failwith "Invalid position entered"
+          | _ -> []
 let formedMills = 
-      [(["a1"; "d1";"g1"],false); 
-       (["a1";"a4"; "a7"] , false);
-       (["a7"; "b6";"c5"] , false);
-       (["c3";"c4";"c5" ] , false);
-       (["c3";"d3";"e3"]  , false);
-       (["g1"; "f2"; "e3"], false);  
-       (["a1"; "b2";"c3"] ,false);
-       (["a4";"b4";"c4" ] ,false);
-       (["b2"; "b4";"b6"] ,false);
-       (["b6"; "d6";"f6"] ,false);
-       (["d1";"d2"; "d3"] ,false);
-       (["d5";"d6";"d7"]  ,false);
-       (["e3";"e4";"e5"]  ,false);
-       (["f2"; "f4"; "f6"],false);
-       (["g1"; "g4"; "g7"],false);
+      [(["a1"; "d1";"g1"], Available); 
+       (["a1";"a4"; "a7"] ,Available);
+       (["a7"; "b6";"c5"] ,Available);
+       (["c3";"c4";"c5" ] ,Available);
+       (["c3";"d3";"e3"]  ,Available);
+       (["g1"; "f2"; "e3"],Available);  
+       (["a1"; "b2";"c3"] ,Available);
+       (["a4";"b4";"c4" ] ,Available);
+       (["b2"; "b4";"b6"] ,Available);
+       (["b6"; "d6";"f6"] ,Available);
+       (["d1";"d2"; "d3"] ,Available);
+       (["d5";"d6";"d7"]  ,Available);
+       (["e3";"e4";"e5"]  ,Available);
+       (["f2"; "f4"; "f6"],Available);
+       (["g1"; "g4"; "g7"],Available);
       ] 
 let tiletostring (tile : Tile) =
     let ss = tile.pos 
@@ -243,13 +261,13 @@ let destroycow board =
              match currentplayer with
              |CB -> CWList
              |CW -> CBList
-             |_ ->[]
+         
         match List.exists((=) n) (List.map conditionToString (List.map (fun (x:Tile) -> x.cond) (deslist))) with
         |true -> UpdateCell board n Blank 
         |_ -> UpdateCell board n Blank //
 
     |_ -> UpdateCell board n Blank //
-// Write out a method to update a certain tile and return a new board with all values
+// Write out a method to update a certain til.0e and return a new board with all values
    //Unlike imperative programming, you can't modify values so just make a new board work with it
 
 (*let UpdateCell (theBoard: GameBoard) pos conditionState = 
@@ -260,17 +278,8 @@ let destroycow board =
           let replaceState = (List.map (mapCelltoCell) theBoard.Board)
           {theBoard with Board = replaceState}*)
      
-            
-let placeTile (board: GameBoard) pos newState = ""
+    
 
-
-(*let inMills inPos = 
-      let getListOfNeighbours = checkCellsAroundPosition inPos
-      let lenOfNeigh = List.length getListOfNeighbours
-      match lenOfNeigh = 3 with 
-      |  -> true
-      | mills.Item 1 -> true
-      | mills. *)
 
 let makeMove player pos game =
     let newBoard = UpdateCell (game) pos (Basic player)
@@ -280,10 +289,6 @@ let DestroyPiece player pos game =
     let newBoard = UpdateCell (game) pos (Blank)
 
     newBoard
-(*let buildboard Board =
-    Console.Clear()
-    let board = List.map(fun x updatecell -> updatecell x) Board
-    printBoard (Board)*)
 
 
 
@@ -373,15 +378,40 @@ let matchBoards (board:GameBoard) pos =
       match board1 = board2 with
       | true -> true
       | _ -> false
-     //let MillState = List.map(fun input -> findState input) possibleMill1 
-     //MillState
-   (*let a = List.tryFind (fun xs -> xs = pos::z::_)  board
-   let b = List.tryFind ((=) (x::pos::y)) board
-   let c = List.tryFind ((=) (x::y::pos)) board
-   match (Some a = [] )|| (Some b = [] )|| (Some c = []) with
-   |true -> true
-   | _ -> false*)
 
+
+let removeCow board n =
+    //printfn "Please enter posision you want to move from" 
+   // let n = Console.ReadLine()
+    match inputCheck n with 
+    |true -> 
+        let CBList, CWList = List.partition (fun player -> player.cond = Basic CB) board.Board 
+        let currentplayer =  player //still to come
+        let deslist = 
+             match currentplayer with
+             |CB -> CBList
+             |CW -> CWList
+         
+        match List.exists((=) n) (List.map conditionToString (List.map (fun (x:Tile) -> x.cond) (deslist))) with
+        |true -> UpdateCell board n Blank 
+        |_ -> UpdateCell board n Blank
+    | _ -> board
+let rec moveCows (board:GameBoard) posCur posMoveTo player = 
+  
+    let getNeighbourCells = checkCellsAroundPosition posCur
+    match List.exists ((=) posMoveTo) getNeighbourCells with 
+    |true -> makeMove player posMoveTo board
+    |_-> moveCows (board:GameBoard) posCur posMoveTo player
+
+let rec FlyCows (board:GameBoard) posCur posMoveTo player = 
+  
+    //let getNeighbourCells = checkCellsAroundPosition posCur
+    match List.exists ((=) posMoveTo) allBoardCoordinates with 
+    |true -> makeMove player posMoveTo board
+    |_-> FlyCows (board:GameBoard) posCur posMoveTo player
+
+ 
+      
 let rec run player game  =
    // need to find the blank cells that can be used...
    clearboard()
@@ -393,8 +423,11 @@ let rec run player game  =
        | "Y" | "y" -> run CB board
        | _ -> ()   
    printfn "%A's turn.  Type the Co-ordinates [<LETTER><NUMBER>] of the cell that you want to play into." (player)
-
+   let getLenB = returnListBlack game
+   let getLenW = returnListWhite game
+   //let getLenW = CWList.Length
    let b = System.Console.ReadLine() // Co-ordinate for cow from user
+   let n = b.ToLower()
        //updateplayer player n
    match n with
    | "a1"  | "a4" | "a7"  | "b2" |"b4"  | "b6"  | "c3" | "c4" | "c5"  | "d1" | "d2" | "d3" | "d5" | "d6" | "d7" | "e3" | "e4" | "e5" | "f2" | "f4" | "f6" | "g1" | "g4" | "g7"  ->
@@ -411,86 +444,40 @@ let rec run player game  =
              let (board,pos) = output
              let (tmpBoard2) = AccountForMill1 board 0
              let (tmpBoard3) = AccountForMill2 tmpBoard2 0
-             printBoard(board)
+             printBoard(tmpBoard3)
              run (swapPlayer player) tmpBoard3  
-       | Basic player -> printfn "Invalid Input, Please re-enter position" 
-              
-           (*
-            |Mill GameBoard ->
-                match checkmill pos GameBoard with
-                |true ->
-                
-                    printfn "Enter position of cow you'd like to destroy [<Letter><Number>]: "
-                    let var = destroycow GameBoard
-                    run (swapPlayer player) var
-                |_ -> Ongoing GameBoard
-                      printfn ("")
-            |Ongoing GameBoard->
-                updateplayer currentPlayer n
-                run (swapPlayer player) newBoard
-
-            |Winner (player, Gameboard) ->
-               printBoard ()
-               printfn "Winner is %A" player
-               playAgain ()
-            |Draw ->
-               printfn "Draaaaw"
-               playAgain ()*)
-       | SuperSayin player ->
-            printfn "Invalid Input, Please re-enter position"
-            run player game //cows
+       | Basic player -> 
+              match game.bullets with 
+              | (0,0) -> 
+                       let b = Console.ReadLine() 
+                       let flag = inputCheck b
+                       match flag with 
+                       | true -> let board = moveCows game n b player
+                                 let newBoard = removeCow board n
+                                 printBoard(newBoard)
+                                 run (swapPlayer player) board
+                       | false -> run (swapPlayer player) board
+              | _ -> run (swapPlayer player) board 
+          
+        | SuperSayin player -> 
+              match game.bullets with 
+              | (0,0) ->
+                    match (getLenB.Length,getLenW.Length) with
+                    | (3,_) 
+                    | (_,3) ->
+                            let b = Console.ReadLine() 
+                            let flag = inputCheck b
+                            match flag with 
+                            | true -> let board = moveCows game n b player
+                                      let newBoard = removeCow board n
+                                      printBoard(newBoard)
+                                      run (swapPlayer player) board
+                            | false -> run (swapPlayer player) board
+                    | _ -> run (swapPlayer player) board
+              | _ -> run (swapPlayer player) board 
+   
              
-   | _ -> run player game //cows
-// Prints out the board based on row values
- //Write a method to  print out the board
-    // Given the data structure at the top i.e board, generate a board gui
-
-
-    
-// Write a BoardtoString Method that converts any given board to a string, and return it
-
-// 
-
-// Tester method to run through the 2D array of input values...
-(*let printOutValidCoordinates = 
-          let rec innerHelp (input: string list list) index = 
-              match input with
-              | actCoardinates -> 
-                   match (index) < 6 with
-                   |true ->
-                      let tmp = actCoardinates.[index]
-                      for i in tmp do
-                        printfn "%s status is: %b\t" i (inputCheck i)
-                      printfn "\n"
-                      innerHelp input (index+1)
-                   | _ -> printfn "Done"
-              //| [[]]-> printfn "Not correct input" 
-          innerHelp mil 0  
-*)
-
-(*
-let rec run player game  =
-    // need to find the blank cells that can be used...
-    clearboard()
-    printBoard game                      
-    run player game// cows 
-    printfn "%A's turn.  Type the Co-ordinates [<LETTER><NUMBER>] of the cell that you want to play into." player
-
-    let b = System.Console.ReadLine() // Co-ordinate for cow from user
-    let n = b.ToUpper ()
-        //updateplayer player n
-    match n with
-    | "A1"  | "A4" | "A7" | "a7" | "B2" |"B4"  | "B6"  | "C3" | "C4" | "C5"  | "D1" | "D2" | "D3" | "D5" | "D6" | "D7" | "E3" | "E4" | "E5" | "F2" | "F4" | "F6" | "G1" | "G4" | "G7"  ->
-       match isBlank game n with
-        | true -> 
-              printfn "Invalid Input, Please re-enter position" 
-              makeMove player game   //Shoot n game player    
-        | _ ->
-             printfn "Invalid Input, Please re-enter position" 
-             run player game //cows
-               
-    | _ -> run player game //cows
-// Prints out the board based on row values*)
+   | _ -> run player game
 
 let rules() = printfn ("The game contains 3 stages
 Stage 1: Cow placing
@@ -522,50 +509,12 @@ let getinput()  = (System.Console.ReadKey true).KeyChar
  
 
 
-(*let rec runGame currentPlayer game  =
-    let playAgain () =
-        printfn "Play again? [y/N] "
-        match System.Console.ReadLine() with
-        | "Y" | "y" -> runGame CB blankBoard
-        | _ -> ()
- 
-    match run currentPlayer game with
-    |Ongoing newBoard -> 
-         //updateplayer currentPlayer n 
-         runGame (swapPlayer currentPlayer) newBoard 
-    |Mill newBoard ->
-         printfn "Enter position of cow you'd like to destroy [<Letter><Number>]: "
-         let var = DestroyPiece newBoard 
-         runGame (swapPlayer currentPlayer) var*)
-(*let rec runGame currentPlayer game   =
-    let playAgain () =
-        printfn "Play again? [y/N] "
-        match System.Console.ReadLine() with
-        | "Y" | "y" -> runGame CB blankBoard //(cows-1)
-        | _ -> ()
-
-        match run currentPlayer game  with
-        |Ongoing newBoard -> runGame (swapPlayer currentPlayer) newBoard //(cows-1)
-        |Mill newBoard ->
-             printfn "Enter position of cow you'd like to destroy: "
-             let var = DestroyPiece newBoard 
-             runGame (swapPlayer currentPlayer) var  //(cows-1)
-
-        |Winner (player, board) ->
-            printBoard board
-            printfn "Winner is %A" player
-            playAgain ()
-        |Draw ->
-           printfn "Draaaaw"
-           playAgain ()
-  
-
 //let placingcows input =
 
 let msgPlacing = "Please enter the letter you want to place your cow at"
 let msgMoving = "Please enter the letter you want to move your cow to"
 let msgFlying = "Please enter the letter you want to fly your cow to"
-let msgError = "Invalid output, please choose a different cell"   *)
+let msgError = "Invalid output, please choose a different cell"   
 
 [<EntryPoint>]
 let main argv = 
